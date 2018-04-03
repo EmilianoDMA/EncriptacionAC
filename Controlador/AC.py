@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #---------------------------------------------------------------------------------------#
 #                                  CODIGO CIFRADOR                                      #
 # --------------                                                                        #
@@ -13,13 +15,16 @@
 import sys
 import random
 import binascii
+import socket
+from pdb import set_trace
 
 #Recibe el mensaje y lo pasa a bytes
 mensaje = sys.argv[1]
-mensajeUTF = mensaje.encode('utf-8')
-msjBytes = bytes(mensajeUTF)
+mensajeUTF = list (mensaje.encode('utf-8'))
+print("Mensaje:", mensaje)
+print("Mensaje UTF:", mensajeUTF)
 
-MAX_TIME = len(mensaje) * 4
+MAX_TIME = len(mensaje) * 8
 HALF_SIZE = MAX_TIME
 indices = range(-HALF_SIZE, HALF_SIZE+1)
 
@@ -42,32 +47,31 @@ for time in range(0, MAX_TIME): #Ejecucion
     cells = {i: new_state[patterns[i]] for i in indices}
     cells[-HALF_SIZE-1] = '0'
     cells[ HALF_SIZE+1] = '0'
-mascara = [] #Creación de la máscara a partir del último estado del AC
-for i in indices: #el estado del AC está en char. Por esto se recorre el mismo y se appendea en mascara[] el equivalente en integer de cada posición.
-    if cells[i] == '1': #cells[] contiene el último estado del AC
-        mascara.append(1)
-    else:
-        mascara.append(0)
 
-#Pasa el mensaje de Bytes a su equivalente binario en un arreglo de enteros de la forma [1, 0, 0, 0, 1, 0, 1,......]
-msjBinario = []
-count = 0
-for j in msjBytes:
-    binario = bin(j) #pasa cada byte a su equivalente binario en forma de "0bxxxxxxxx"
-    for k in binario: #recorre el byte en binario con un contador para omitir el "0b" de cada byte.
-        if count > 1:
-            msjBinario.append(int(k)) #appendea solo la parte binaria posterior a "0b" de cada byte en msjBinario. Cada bit lo appendea individualmente.
-        count = count + 1
-    count = 0
-print("BINARIO")
-print(msjBinario)
+#Creación de la máscara a partir del último estado del AC
+arregloDividido = []
+concat = ""
+bitCant = 1
+for y in cells:
+    concat =  concat + str(cells[y])
+    if bitCant == 8:
+        arregloDividido.append(concat)
+        bitCant = 0
+        concat = ""
+    bitCant = bitCant + 1
+mascara = []
+i = 0
+for i in arregloDividido:
+    mascara.append(int(i, 2))
+y = 0
+
+
 #CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje (en binario).
 arregloCifrado = []
 indice = 0
-for m in msjBinario:
-    arregloCifrado.append(str(m ^ mascara[indice]))
-    indice = indice + 1
-textoCifrado = ''.join(arregloCifrado) #Se hace un join del arreglo para que este quede en forma de cadena.
+for m in mensajeUTF:
+    arregloCifrado.append((m ^ mascara[indice]))
+    indice = indice + 1 
 #print(textoCifrado) #TEXTO CIFRADO A ENVIAR
 
 #toma el estado inicial y lo parsea a Str para que sea más facil la interpretación luego, del lado del decifrador.
@@ -77,6 +81,32 @@ for i in estadoInicial:
 estadoEnvStr = ''.join(estadoEnv)
 
 #Enviar estadoInicial, textoCifrado, MAX_TIME
-print(textoCifrado)
-print(estadoEnvStr)
-print(MAX_TIME)
+print("Estado Inicial: ", estadoEnvStr)
+print("Tiempo: ", MAX_TIME)
+print("Mensaje cifrado: ", arregloCifrado)
+
+# MANDA mandar
+HOST = 'localhost'
+PORT = 8081
+#Envia estado inicial
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+s.send(estadoEnvStr.encode('utf-8'))
+s.close()
+#Envia tiempo
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+s.send(str(MAX_TIME).encode('utf-8'))
+s.close()
+#Envia largo del cifrado
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+s.send(str(len(arregloCifrado)).encode('utf-8'))
+s.close()
+#Envia mensaje cifrado
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+for i in arregloCifrado:
+    s.send(str(i).encode('utf-8'))
+    print(str(i).encode('utf-8')) #TODO meter un sleep en vez de esta linea o algun tipo de sincronización
+s.close()
