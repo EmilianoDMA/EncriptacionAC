@@ -2,6 +2,7 @@
 
 #---------------------------------------------------------------------------------------#
 #                                  CODIGO DESCIFRADOR                                   #
+# EJECUTAR COMO: "AC - decodificador.py" <puerto>                                       #
 # --------------                                                                        #
 # RECIBE: CADENA ENCRIPTADA, ESTADO INICIAL, TIEMPO X                                   #
 # --------------                                                                        #
@@ -17,28 +18,25 @@ import binascii
 import socket
 from pdb import set_trace
 
-# RECIBE computar
+#RECEPCIÓN. Setea la conexión y recibe los datos necesarios
 HOST = 'localhost'
 PORT = 8081
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((HOST, int(sys.argv[1])))
-#Recibe estado inicial
-s.listen(1)
-conn, addr = s.accept()
-cellsRecv = conn.recv(1024).decode('utf-8')
-print("Estado Inicial: ", cellsRecv)
-conn.close()
-#Recibe tiempo
+s.bind((HOST, PORT))
+#Recibe tiempo que se ejecutará el AC
 s.listen(1)
 conn, addr = s.accept()
 MAX_TIME = int(conn.recv(1024).decode('utf-8'))
-print("Tiempo: ", MAX_TIME)
 conn.close()
-#Recibe el largo del mensaje
+#Recibe estado inicial
+s.listen(1)
+conn, addr = s.accept()
+cellsRecv = conn.recv((MAX_TIME * 2)+1).decode('utf-8')
+conn.close()
+#Recibe el largo del mensaje encriptado
 s.listen(1)
 conn, addr = s.accept()
 maxLoop = int(conn.recv(1024).decode('utf-8'))
-print("Largo: ", maxLoop)
 conn.close()
 #Recibe el mensaje encriptado
 mensajeCifrado = []
@@ -48,13 +46,11 @@ for x in range(0, maxLoop):
     aux = int(conn.recv(1024).decode('utf-8'))
     mensajeCifrado.append(aux)
 conn.close()
-print("Mensaje cifrado: ", mensajeCifrado)
 
 #Setea el tiempo recibido y otras variables
 HALF_SIZE = MAX_TIME
 indices = range(-HALF_SIZE, HALF_SIZE+1)
-
-#Genera un estado inicial en Cells para el AC
+#Setea el estado inicial recibido para ejecutar el AC
 cells = {i: '0' for i in indices}
 cont = 0
 for i in cells:
@@ -64,8 +60,6 @@ for i in cells:
 cells[-HALF_SIZE-1] = '0' # Llena ambos extremos
 cells[ HALF_SIZE+1] = '0'
 estadoInicial = []
-estadoInicial = cells #Guarda el estado inicial
-
 
 #Ejecuta el AC y genera la mascara a partir del estado final
 new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
@@ -77,8 +71,7 @@ for time in range(0, MAX_TIME): #Ejecucion
     cells[-HALF_SIZE-1] = '0'
     cells[ HALF_SIZE+1] = '0'
 
-
-#Pasa la mascara a decimal
+#Pasa la mascara de binario a un arreglo de enteros decimales (tomando de a 8 bits)
 arregloDividido = []
 concat = ""
 bitCant = 1
@@ -95,21 +88,15 @@ for i in arregloDividido:
     mascara.append(int(i, 2))
 y = 0
 
-#convierte el string recivido a un arreglo de enteros binarios para poder hacer el XOR
-arregloCifrado = list(mensajeCifrado) #convierte el string a array
-arregloCifradoInt = [] #convierte el arreglo de char en arreglo de int
-for i in arregloCifrado:
-    arregloCifradoInt.append(int(i))
-
-#DESCIFRADO. Se descifra haciendo un XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado (en binario). Se obtiene el binario original.
+#DESCIFRADO. Se descifra haciendo XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado, ambos siendo arreglos de enteros decimales.
+#Se obtiene, asi, el mensaje original en forma de un arreglo de enteros. El contenido de este arreglo son los caracteres del mensaje original en sus valores UTF-8.
 arregloDescifrado = []
 indice = 0
-for m in arregloCifradoInt:
+for m in mensajeCifrado:
     arregloDescifrado.append((m ^ mascara[indice]))
     indice = indice + 1
 
-#TODO convertir el binario en texto teniendo en cuenta la longitud (tiempo / 4) de la cadena original.
-print("Mensaje UTF: ", arregloDescifrado)
+#Se decodifica el arreglo, obteniendo finalmente el mensaje original.
 cadena = bytes(arregloDescifrado)
 textoDescifrado = cadena.decode('utf-8')
 print(textoDescifrado)

@@ -2,6 +2,7 @@
 
 #---------------------------------------------------------------------------------------#
 #                                  CODIGO CIFRADOR                                      #
+# EJECUTAR COMO: python AC.py <mensaje> <puerto>
 # --------------                                                                        #
 # RECIBE: LA CADENA ORIGINAL                                                            #
 # --------------                                                                        #
@@ -17,18 +18,18 @@ import random
 import binascii
 import socket
 from pdb import set_trace
+from time import sleep
 
-#Recibe el mensaje y lo pasa a bytes
+#Recibe el mensaje y lo pasa a un arreglo de int donde cada posicion es un caracter en su valor UTF-8
 mensaje = sys.argv[1]
 mensajeUTF = list (mensaje.encode('utf-8'))
-print("Mensaje:", mensaje)
-print("Mensaje UTF:", mensajeUTF)
 
+#Setea el tiempo máximo que se ejecutara el AC y otras variables
 MAX_TIME = len(mensaje) * 8
 HALF_SIZE = MAX_TIME
 indices = range(-HALF_SIZE, HALF_SIZE+1)
 
-#Genera un estado inicial en Cells para el AC
+#Genera un estado inicial aleatorio en Cells para el AC
 cells = {i: '0' for i in indices}
 for i in cells:
     azar = random.randint(0,1)
@@ -37,8 +38,13 @@ cells[-HALF_SIZE-1] = '0' # Llena ambos extremos
 cells[ HALF_SIZE+1] = '0'
 estadoInicial = []
 estadoInicial = cells #Guarda el estado inicial
+#Convierte el estado inicial a Str para que sea más facil la interpretación en pasos posteriores.
+estadoEnv = []
+for i in estadoInicial:
+    estadoEnv.append(estadoInicial[i])
+estadoEnvStr = ''.join(estadoEnv)
 
-#Ejecuta el AC y genera la mascara a partir del estado final
+#Ejecuta el AC
 new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
              "100": '1', "011": '1', "010": '1', "001": '1'} #Comportamiento que tendrá
 for time in range(0, MAX_TIME): #Ejecucion
@@ -48,7 +54,8 @@ for time in range(0, MAX_TIME): #Ejecucion
     cells[-HALF_SIZE-1] = '0'
     cells[ HALF_SIZE+1] = '0'
 
-#Creación de la máscara a partir del último estado del AC
+#Creación de la máscara a partir del último estado (cells) del AC. La mascara es un arreglo de enteros decimales.
+#Para crear la máscara, se utiliza Cells (binario) tomando de a 8 bits y se pasandolos a su equivalente decimal dando como resultado un arreglo.
 arregloDividido = []
 concat = ""
 bitCant = 1
@@ -65,48 +72,36 @@ for i in arregloDividido:
     mascara.append(int(i, 2))
 y = 0
 
-
-#CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje (en binario).
+#CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara y el mensaje (ambos como arreglos de enteros decimales).
 arregloCifrado = []
 indice = 0
 for m in mensajeUTF:
     arregloCifrado.append((m ^ mascara[indice]))
     indice = indice + 1 
-#print(textoCifrado) #TEXTO CIFRADO A ENVIAR
 
-#toma el estado inicial y lo parsea a Str para que sea más facil la interpretación luego, del lado del decifrador.
-estadoEnv = []
-for i in estadoInicial:
-    estadoEnv.append(estadoInicial[i])
-estadoEnvStr = ''.join(estadoEnv)
-
-#Enviar estadoInicial, textoCifrado, MAX_TIME
-print("Estado Inicial: ", estadoEnvStr)
-print("Tiempo: ", MAX_TIME)
-print("Mensaje cifrado: ", arregloCifrado)
-
-# MANDA mandar
+# ENVIO. Envia los datos necesarios al descifrador.
 HOST = 'localhost'
 PORT = 8081
-#Envia estado inicial
+#Envia tiempo que se ejecuto el AC
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
-s.send(estadoEnvStr.encode('utf-8'))
-s.close()
-#Envia tiempo
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+s.connect((HOST, PORT))
 s.send(str(MAX_TIME).encode('utf-8'))
 s.close()
-#Envia largo del cifrado
+#Envia estado inicial
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+s.connect((HOST, PORT))
+s.send(estadoEnvStr.encode('utf-8')) 
+#s.send(str(int(estadoEnvStr,2)).encode('utf-8'))
+s.close()
+#Envia largo del texto cifrado
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
 s.send(str(len(arregloCifrado)).encode('utf-8'))
 s.close()
 #Envia mensaje cifrado
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, int(sys.argv[2]))) #argv2 es el puerto
+s.connect((HOST, PORT))
 for i in arregloCifrado:
     s.send(str(i).encode('utf-8'))
-    print(str(i).encode('utf-8')) #TODO meter un sleep en vez de esta linea o algun tipo de sincronización
+    sleep( 0.01 ) #TODO implementar una sincronización correcta
 s.close()
