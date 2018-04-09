@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QMainWindow
-
 from Vista.UI import Ventana
 from Controlador.Controlador import Controlador
 

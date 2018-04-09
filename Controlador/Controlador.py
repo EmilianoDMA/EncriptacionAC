@@ -11,8 +11,8 @@ class Controlador:
     def recibirMensaje(self, mensaje):
         self.vista.escribirMensajeRecibido(mensaje)
 
-    def enviarMensaje(self):
-        self.vista.escribirMensajeEnviado()
+    def enviarMensaje(self, mensaje):
+        self.vista.escribirMensajeEnviado(mensaje)
 
     def desconectar(self):
         pass
