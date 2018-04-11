@@ -20,3 +20,6 @@ class Vista(QMainWindow):
 
     def escribirMensajeEnviado(self):
         self.ventana.mensajes.append("")
+        
+    def enviarMensaje(): #TODO tomar mensaje de la interfaz
+        self.controlador.enviarMensaje()

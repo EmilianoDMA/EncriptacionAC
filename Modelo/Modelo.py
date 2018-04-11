@@ -61,31 +61,31 @@ class ConexionEntrante(threading.Thread):
 
     def recibirMensaje(self):
         #Recibe tiempo que se ejecutará el AC
-        s.listen(1)
-        conn, addr = s.accept()
+        self.socket.listen(1)
+        conn, addr = self.socket.accept()
         MAX_TIME = int(conn.recv(1024).decode('utf-8'))
         conn.close()
 
         #Recibe estado inicial
-        s.listen(1)
-        conn, addr = s.accept()
+        self.socket.listen(1)
+        conn, addr = self.socket.accept()
         cellsRecvCifrado = conn.recv((MAX_TIME * 2)+1).decode('utf-8')
         cellsRecv = bin(int(cellsRecvCifrado) ^ self.numeroSecretoRecibo)
         conn.close()
 
         #Recibe el largo del mensaje encriptado
-        s.listen(1)
-        conn, addr = s.accept()
+        self.socket.listen(1)
+        conn, addr = self.socket.accept()
         maxLoop = int(conn.recv(1024).decode('utf-8'))
         conn.close()
 
         #Recibe el mensaje encriptado
         mensajeCifrado = []
-        s.listen(1)
-        conn, addr = s.accept()
+        self.socket.listen(1)
+        conn, addr = self.socket.accept()
         for x in range(0, maxLoop):
-        aux = int(conn.recv(1024).decode('utf-8'))
-        mensajeCifrado.append(aux)
+            aux = int(conn.recv(1024).decode('utf-8'))
+            mensajeCifrado.append(aux)
         conn.close()
 
         #Setea el tiempo recibido y otras variables
@@ -95,9 +95,9 @@ class ConexionEntrante(threading.Thread):
         cells = {i: '0' for i in indices}
         cont = 2
         for i in cells:
-        valor = cellsRecv[cont]
-        cont = cont + 1
-        cells[i] = str(valor)
+            valor = cellsRecv[cont]
+            cont = cont + 1
+            cells[i] = str(valor)
         cells[-HALF_SIZE-1] = '0' # Llena ambos extremos
         cells[ HALF_SIZE+1] = '0'
         estadoInicial = []
@@ -106,27 +106,27 @@ class ConexionEntrante(threading.Thread):
         new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
         "100": '1', "011": '1', "010": '1', "001": '1'} #Comportamiento que tendrá
         for time in range(0, MAX_TIME): #Ejecucion
-        patterns = {i: cells[i-1] + cells[i] + cells[i+1] for i in
-        indices}
-        cells = {i: new_state[patterns[i]] for i in indices}
-        cells[-HALF_SIZE-1] = '0'
-        cells[ HALF_SIZE+1] = '0'
+            patterns = {i: cells[i-1] + cells[i] + cells[i+1] for i in
+                indices}
+            cells = {i: new_state[patterns[i]] for i in indices}
+            cells[-HALF_SIZE-1] = '0'
+            cells[ HALF_SIZE+1] = '0'
 
         #Pasa la mascara de binario a un arreglo de enteros decimales (tomando de a 8 bits)
         arregloDividido = []
         concat = ""
         bitCant = 1
         for y in cells:
-        concat =  concat + str(cells[y])
-        if bitCant == 8:
-        arregloDividido.append(concat)
-        bitCant = 0
-        concat = ""
-        bitCant = bitCant + 1
+            concat =  concat + str(cells[y])
+            if bitCant == 8:
+                arregloDividido.append(concat)
+                bitCant = 0
+                concat = ""
+            bitCant = bitCant + 1
         mascara = []
         i = 0
         for i in arregloDividido:
-        mascara.append(int(i, 2))
+            mascara.append(int(i, 2))
         y = 0
 
         #DESCIFRADO. Se descifra haciendo XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado, ambos siendo arreglos de enteros decimales.
@@ -134,8 +134,8 @@ class ConexionEntrante(threading.Thread):
         arregloDescifrado = []
         indice = 0
         for m in mensajeCifrado:
-        arregloDescifrado.append((m ^ mascara[indice]))
-        indice = indice + 1
+            arregloDescifrado.append((m ^ mascara[indice]))
+            indice = indice + 1
 
         #Se decodifica el arreglo, obteniendo finalmente el mensaje original.
         cadena = bytes(arregloDescifrado)
