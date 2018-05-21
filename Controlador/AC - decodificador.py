@@ -22,26 +22,20 @@ from pdb import set_trace
 HOST = 'localhost'
 PORT = 8081
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((HOST, PORT))
+s.bind((HOST, PORT))        #Bindea la direccion del socket al host y port
+s.listen(1)                 #El "servidor" queda escuchando el puerto
+conn, addr = s.accept()     #El "servidor" acepta las conexiones del socket
 #Recibe tiempo que se ejecutará el AC
-s.listen(1)
-conn, addr = s.accept()
 MAX_TIME = int(conn.recv(1024).decode('utf-8'))
 conn.close()
 #Recibe estado inicial
-s.listen(1)
-conn, addr = s.accept()
 cellsRecv = conn.recv((MAX_TIME * 2)+1).decode('utf-8')
 conn.close()
 #Recibe el largo del mensaje encriptado
-s.listen(1)
-conn, addr = s.accept()
 maxLoop = int(conn.recv(1024).decode('utf-8'))
 conn.close()
 #Recibe el mensaje encriptado
 mensajeCifrado = []
-s.listen(1)
-conn, addr = s.accept()
 for x in range(0, maxLoop):
     aux = int(conn.recv(1024).decode('utf-8'))
     mensajeCifrado.append(aux)

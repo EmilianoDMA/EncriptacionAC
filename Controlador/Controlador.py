@@ -6,13 +6,14 @@ class Controlador:
         self.modelo = Modelo.Modelo(self)
 
     def conectar(self, ip, puerto):
-        pass
+        self.modelo.conectar(ip, puerto)
 
     def recibirMensaje(self, mensaje):
         self.vista.escribirMensajeRecibido(mensaje)
 
     def enviarMensaje(self, mensaje):
+        self.modelo.envio.enviarMensaje()
         self.vista.escribirMensajeEnviado(mensaje)
 
     def desconectar(self):
-        pass
+        self.modelo.desconectar()

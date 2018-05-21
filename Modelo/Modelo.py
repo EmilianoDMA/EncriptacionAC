@@ -18,14 +18,12 @@ class Modelo():
 
     def conectar(self, ip, puerto):
         # TODO Crear la conexion en su propio hilo
-        self.envio = ConexionSaliente(self, ip, puerto)
-        # TODO Crear la conexion en su propio hilo
         self.recep = ConexionEntrante(self, ip, puerto)
-
-            
+        # TODO Crear la conexion en su propio hilo
+        self.envio = ConexionSaliente(self, ip, puerto)
 
     def recibirMensaje(self, mensaje):
-        self.mensajes_recv.append(mensaje)  #
+        self.mensajes_recv.append(mensaje)  
         self.controlador.recibirMensaje(mensaje)
 
     def enviarMensaje(self, mensaje):
@@ -36,7 +34,7 @@ class Modelo():
             self.controlador.mostrarError("Ocurrió un error en el envío")
 
     def desconectar(self):
-        pass
+        self.envio.desconectarSaliente()
 
 
 class ConexionEntrante(threading.Thread):
@@ -50,43 +48,34 @@ class ConexionEntrante(threading.Thread):
 
     def run(self):
         # Inicializar el socket
-        self.DiffieHellman()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.ip, self.puerto))
-
+        self.socket.listen(1)
+        conn, addr = self.socket.accept()
+        #Clave por DiffieHellman
+        self.DiffieHellman()           
         # Loop de recepción
         socket_ok = True
         while socket_ok:
             socket_ok = self.recibirMensaje()
+        conn.close()
 
     def recibirMensaje(self):
         #Recibe tiempo que se ejecutará el AC
-        self.socket.listen(1)
-        conn, addr = self.socket.accept()
         MAX_TIME = int(conn.recv(1024).decode('utf-8'))
-        conn.close()
 
         #Recibe estado inicial
-        self.socket.listen(1)
-        conn, addr = self.socket.accept()
         cellsRecvCifrado = conn.recv((MAX_TIME * 2)+1).decode('utf-8')
         cellsRecv = bin(int(cellsRecvCifrado) ^ self.numeroSecretoRecibo)
-        conn.close()
 
         #Recibe el largo del mensaje encriptado
-        self.socket.listen(1)
-        conn, addr = self.socket.accept()
         maxLoop = int(conn.recv(1024).decode('utf-8'))
-        conn.close()
 
         #Recibe el mensaje encriptado
         mensajeCifrado = []
-        self.socket.listen(1)
-        conn, addr = self.socket.accept()
         for x in range(0, maxLoop):
             aux = int(conn.recv(1024).decode('utf-8'))
             mensajeCifrado.append(aux)
-        conn.close()
 
         #Setea el tiempo recibido y otras variables
         HALF_SIZE = MAX_TIME
@@ -147,8 +136,6 @@ class ConexionEntrante(threading.Thread):
 
     def DiffieHellman(self):
         numeroSecreto = random.randint(0,5000)
-        self.socket.listen(1)
-        conn, addr = self.socket.accept()
         numeroComun = int(conn.recv(1024).decode('utf-8'))
         modulo = int(conn.recv(1024).decode('utf-8'))
         # RECIBE computar
@@ -156,7 +143,6 @@ class ConexionEntrante(threading.Thread):
         mandar = numeroComun ** numeroSecreto % modulo
         # MANDA mandar
         conn.send(str(mandar).encode('utf-8'))
-        conn.close()
         self.numeroSecretoRecibo = computar**numeroSecreto % modulo
 
 
@@ -252,7 +238,6 @@ class ConexionSaliente():
         PORT = self.puerto
 
         #Envia tiempo que se ejecuto el AC
-        self.socket.connect((HOST, PORT))
         self.socket.send(str(MAX_TIME).encode('utf-8'))
 
         #Envia estado inicial
@@ -268,6 +253,6 @@ class ConexionSaliente():
         for i in arregloCifrado:
             self.socket.send(str(i).encode('utf-8'))
             sleep( 0.01 ) #TODO implementar una sincronización correcta
-        self.socket.close()
 
-    
+    def desconectarSaliente(self):
+        self.socket.close()

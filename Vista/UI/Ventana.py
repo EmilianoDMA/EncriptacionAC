@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         self.scroll_escribir.setWidget(self.scrollAreaWidgetContents_2)
         self.enviar = QtWidgets.QPushButton(self.caja_escribir)
         self.enviar.setGeometry(QtCore.QRect(470, 10, 51, 61))
-        self.enviar.setText("")
+        self.enviar.setText("ENVIAR")
         self.enviar.setObjectName("enviar")
         MainWindow.setCentralWidget(self.principal)
 
