@@ -19,6 +19,7 @@ class Modelo():
     def conectar(self, ip, puerto):
         # TODO Crear la conexion en su propio hilo
         self.recep = ConexionEntrante(self, ip, puerto)
+        print("entremedio")
         # TODO Crear la conexion en su propio hilo
         self.envio = ConexionSaliente(self, ip, puerto)
 
@@ -42,7 +43,7 @@ class ConexionEntrante(threading.Thread):
         threading.Thread.__init__(self)
         self.modelo = modelo
         self.ip = ip
-        self.puerto = puerto
+        self.puerto = int(puerto)
         self.socket = None
         self.numeroSecretoRecibo = 0
 
@@ -151,7 +152,7 @@ class ConexionSaliente():
     def __init__(self, modelo, ip, puerto):
         self.modelo = modelo
         self.ip = ip
-        self.puerto = puerto
+        self.puerto = int(puerto)
         self.socket = None  # TODO
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.ip, self.puerto))
