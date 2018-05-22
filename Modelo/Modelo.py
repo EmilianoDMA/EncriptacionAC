@@ -43,25 +43,32 @@ class ConexionEntrante(threading.Thread):
         threading.Thread.__init__(self)
         self.modelo = modelo
         self.ip = ip
-        self.puerto = int(puerto)
-        self.socket = None
+        self.puerto = 8081
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.numeroSecretoRecibo = 0
+        print("Entrante init termina")  
+        self.run()
 
     def run(self):
+        print("Entrante entró al hilo")           
         # Inicializar el socket
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("Entrante socket creado")           
         self.socket.bind((self.ip, self.puerto))
+        print("Entrante despues de bind, antes de listen")           
         self.socket.listen(1)
+        print("Entrante despues de listen, antes de accept")           
         conn, addr = self.socket.accept()
         #Clave por DiffieHellman
-        self.DiffieHellman()           
+        print("Entrante llega a diffie")           
+        self.DiffieHellman(conn)
+        print("Entrante sale de diffie")           
         # Loop de recepción
         socket_ok = True
         while socket_ok:
-            socket_ok = self.recibirMensaje()
+            socket_ok = self.recibirMensaje(conn)
         conn.close()
 
-    def recibirMensaje(self):
+    def recibirMensaje(self, conn):
         #Recibe tiempo que se ejecutará el AC
         MAX_TIME = int(conn.recv(1024).decode('utf-8'))
 
@@ -135,14 +142,17 @@ class ConexionEntrante(threading.Thread):
 
         return True # TODO
 
-    def DiffieHellman(self):
+    def DiffieHellman(self,conn):
         numeroSecreto = random.randint(0,5000)
         numeroComun = int(conn.recv(1024).decode('utf-8'))
+        print("Entrante recibe el primero")
         modulo = int(conn.recv(1024).decode('utf-8'))
+        print("Entrante recibe el segundo")
         # RECIBE computar
         computar = int(conn.recv(1024).decode('utf-8'))
         mandar = numeroComun ** numeroSecreto % modulo
         # MANDA mandar
+        print("Entrante va a mandar")
         conn.send(str(mandar).encode('utf-8'))
         self.numeroSecretoRecibo = computar**numeroSecreto % modulo
 
@@ -152,12 +162,16 @@ class ConexionSaliente():
     def __init__(self, modelo, ip, puerto):
         self.modelo = modelo
         self.ip = ip
-        self.puerto = int(puerto)
+        self.puerto = 8082
         self.socket = None  # TODO
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("Saliente socket creado")
         self.socket.connect((self.ip, self.puerto))
+        print("Saliente despues de connect")
         self.numeroSecretoEnvio = 0
+        print("Saliente llega a diffie")
         self.DiffieHellman()
+        print("Saliente sale de diffie")
 
     def DiffieHellman(self):
         numeroComun = random.randint(0,5000)
