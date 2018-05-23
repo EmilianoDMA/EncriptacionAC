@@ -46,6 +46,6 @@ class Vista(QtWidgets.QMainWindow):
     def cerrarConexiones(self):
         self.controlador.desconectar()
 
-    def conectar(self, ip, puerto):
-        self.controlador.conectar(ip, puerto)
+    def conectar(self, ip):
+        self.controlador.conectar(ip)
         self.habilitarVista()

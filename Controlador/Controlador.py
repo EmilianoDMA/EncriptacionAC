@@ -5,8 +5,8 @@ class Controlador:
         self.vista = vista
         self.modelo = Modelo.Modelo(self)
 
-    def conectar(self, ip, puerto):
-        self.modelo.conectar(ip, puerto)
+    def conectar(self, ip):
+        self.modelo.conectar(ip)
 
     def recibirMensaje(self, mensaje):
         pass

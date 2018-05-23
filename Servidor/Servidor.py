@@ -5,11 +5,11 @@ import socket, sys, threading, time
 class Servidor:
     puertos_cliente1 = {
         'recv': 8080,
-        'send': 8081
+        'send': 8000
     }
     puertos_cliente2 = {
         'recv': 9090,
-        'send': 9091
+        'send': 9000
     }
 
     def __init__(self):
@@ -50,7 +50,6 @@ class HiloCliente(threading.Thread):
     def __init__(self, servidor, puertos):
         threading.Thread.__init__(self)
         self.servidor = servidor
-        self.puertos = puertos
         self.socket_recep = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket_envio = socket.socket()
@@ -83,8 +82,8 @@ class HiloEnvio(threading.Thread):
     def run(self):
         while True:
             time.sleep(1)
-            if self.servidor.servidor.hayMensajesPendientes(self.servidor.puertos["recv"]):
-                mensajes = self.servidor.servidor.getMensajesPendientes(self.servidor.puertos["recv"])
+            if self.servidor.hayMensajesPendientes(self.servidor.puertos["recv"]):
+                mensajes = self.servidor.getMensajesPendientes(self.servidor.puertos["recv"])
                 for mensaje in mensajes:
                     self.socket.send(mensaje.encode())
             else:
