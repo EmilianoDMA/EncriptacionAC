@@ -79,8 +79,11 @@ class HiloEnvio(threading.Thread):
             time.sleep(1)
             if self.obj_cliente.hayMensajesPendientes():
                 mensajes = self.obj_cliente.getMensajesPendientes()
+                print(mensajes)
                 for mensaje in mensajes:
                     self.socket.send(mensaje.encode())
+                    mensajes.pop()
+                    print(self.socket)
             else:
                 print("No hay mensajes pendientes")
 
@@ -344,6 +347,7 @@ class ConexionSaliente():
         PORT = self.puerto
 
         #Envia tiempo que se ejecuto el AC
+
         self.socket.send(str(MAX_TIME).encode('utf-8'))
 
         #Envia estado inicial
