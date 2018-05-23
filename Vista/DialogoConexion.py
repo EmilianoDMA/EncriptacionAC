@@ -19,7 +19,7 @@ class DialogoConexion(QtWidgets.QDialog):
     def conectar(self):
         ip = self.dialogo.ip.text()
         puerto = self.dialogo.puerto.text()
-        self.ventana.conectar(ip, puerto)
+        self.ventana.conectar(ip)
 
     def desconectar(self):
         self.ventana.close()

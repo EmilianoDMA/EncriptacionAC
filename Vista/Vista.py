@@ -23,18 +23,29 @@ class Vista(QtWidgets.QMainWindow):
         self.ventana.escribir.setReadOnly(False)
         self.ventana.enviar.setEnabled(True)
 
+    def getContenidoMensaje(self):
+        mensaje = self.ventana.escribir.toPlainText()
+        self.ventana.escribir.clear()
+        return mensaje
+
     def escribirMensajeRecibido(self, mensaje):
-        self.ventana.mensajes.setText(mensaje)
+        contenido = self.ventana.mensajes.toPlainText()
+        self.ventana.mensajes.clear()
+        self.ventana.mensajes.setPlainText(contenido+mensaje+"\n")
 
-    def escribirMensajeEnviado(self):
-        self.ventana.mensajes.append("")
+    def escribirMensajeEnviado(self, mensaje):
+        contenido = self.ventana.mensajes.toPlainText()
+        self.ventana.mensajes.clear()
+        self.ventana.mensajes.setPlainText(contenido+mensaje+"\n")
 
-    def enviarMensaje(self): #TODO tomar mensaje de la interfaz
-        self.controlador.enviarMensaje()
+    def enviarMensaje(self):
+        mensaje = self.ventana.escribir.toPlainText()
+        self.ventana.escribir.cut()
+        self.controlador.enviarMensaje(mensaje)
 
     def cerrarConexiones(self):
         self.controlador.desconectar()
 
-    def conectar(self, ip, puerto):
-        self.controlador.conectar(ip, puerto)
+    def conectar(self, ip):
+        self.controlador.conectar(ip)
         self.habilitarVista()
