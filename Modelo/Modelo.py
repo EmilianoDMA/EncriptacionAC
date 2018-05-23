@@ -24,12 +24,17 @@ class Modelo:
         self.socket_envio = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def conectar(self, ip_servidor):
+    def conectar(self, ip_servidor, puerto):
         # Me conecto al servidor
-        self.socket_envio.connect((ip_servidor, Modelo.puertos_servidor['send']))
+        print(type(puerto))
+        if int(puerto) == 8080:
+            puerto_snd = 8081
+        else:
+            puerto snd = 9091 
+        self.socket_envio.connect((ip_servidor, puerto_snd)) #Modelo.puertos_servidor['send']))
         print("Se conectó el stream de envío hacia "+ip_servidor)
         # Espero la conexion del cliente.
-        self.socket_recep.bind(('0.0.0.0', Modelo.puertos_servidor['recv']))
+        self.socket_recep.bind(('0.0.0.0', puerto_snd)) #Modelo.puertos_servidor['recv']))
         self.socket_recep.listen(1)
         self.cliente, self.direccion = self.socket_recep.accept()
         print("Se conecto el stream de entrada del cliente "+self.direccion[0])
