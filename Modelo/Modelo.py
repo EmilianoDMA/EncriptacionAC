@@ -11,7 +11,7 @@ from time import sleep
 
 class Modelo:
     puertos_servidor = {
-        'send': 8080,  # Socket en el que el servidor espera recibir datos.
+        'send': 9090,  # Socket en el que el servidor espera recibir datos.
         'recv': 8000   # Socket en el que el servidor pone datos para enviar.
     }
 
@@ -24,12 +24,13 @@ class Modelo:
         self.socket_envio = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def conectar(self, ip_servidor):
+    def conectar(self, ip_servidor, puerto):
         # Me conecto al servidor
-        self.socket_envio.connect((ip_servidor, Modelo.puertos_servidor['send']))
+        self.puerto = puerto
+        self.socket_envio.connect((ip_servidor, self.puerto))
         print("Se conectó el stream de envío hacia "+ip_servidor)
         # Espero la conexion del cliente.
-        self.socket_recep.bind(('0.0.0.0', Modelo.puertos_servidor['recv']))
+        self.socket_recep.bind(('0.0.0.0', self.puerto+1))
         self.socket_recep.listen(1)
         self.cliente, self.direccion = self.socket_recep.accept()
         print("Se conecto el stream de entrada del cliente "+self.direccion[0])
