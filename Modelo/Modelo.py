@@ -100,7 +100,10 @@ class HiloRecepcion(threading.Thread):
     def run(self):
         while True:
             mensaje = self.cliente.recv(1024)
+            print("Recibí : " + str(mensaje))
             self.obj_cliente.recibirMensaje(mensaje.decode())
+            print("Recibí : " + str(mensaje.decode()))
+
 
 """
 class Modelo():
