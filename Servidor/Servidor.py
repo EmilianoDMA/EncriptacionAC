@@ -14,7 +14,7 @@ class Servidor:
 
     def __init__(self):
         self.lista_mensajes1 = []
-            self.lista_mensajes2 = []
+        self.lista_mensajes2 = []
 
         self.start()
 
@@ -82,7 +82,7 @@ class HiloCliente(threading.Thread):
     def getMensajesPendientes(self):
         return self.servidor.getMensajesPendientes(self.id)
 
-    def nuevoMensajeRecibido(self, mensaje):
+    def mensajeNuevoRecibido(self, mensaje):
         self.servidor.mensajeNuevoRecibido(mensaje, self.id)
 
 class HiloEnvio(threading.Thread):
@@ -95,12 +95,13 @@ class HiloEnvio(threading.Thread):
     def run(self):
         while True:
             time.sleep(1)
-            if self.padre.hayMensajesPendientes(self.padre.puertos["recv"]):
-                mensajes = self.padre.getMensajesPendientes(self.padre.puertos["recv"])
+            if self.padre.hayMensajesPendientes():
+                mensajes = self.padre.getMensajesPendientes()
+                print("Hay "+str(len(mensajes))+" mensajes pendientes para el cliente "+str(self.padre.id))
                 for mensaje in mensajes:
                     self.socket.send(mensaje.encode())
             else:
-                print("No hay mensajes pendientes")
+                print("No hay mensajes pendientes para el cliente "+str(self.padre.id))
 
 
 class HiloRecepcion(threading.Thread):
@@ -114,7 +115,7 @@ class HiloRecepcion(threading.Thread):
     def run(self):
         while True:
             mensaje = self.cliente.recv(1024)
-            #self.padre.mensajeNuevoRecibido(mensaje.decode(), self.padre.puertos["recv"])
+            self.padre.mensajeNuevoRecibido(mensaje.decode())
             print(mensaje)
 
 
