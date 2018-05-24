@@ -14,47 +14,42 @@ class Servidor:
 
     def __init__(self):
         self.lista_mensajes1 = []
-        self.lista_mensajes2 = []
-        self.direccion_cliente1 = ""
-        self.direccion_cliente2 = ""
+            self.lista_mensajes2 = []
 
         self.start()
 
     def start(self):
-        self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1)
-        self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2)
+        self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, 1)
+        self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, 2)
         self.cliente1.start()
         self.cliente2.start()
 
-    def getMensajesPendientes(self, puerto):
-        if puerto == Servidor.puertos_cliente1:
-            return self.lista_mensajes1
-        else:
+    def getMensajesPendientes(self, id):
+        if id == 1:
             return self.lista_mensajes2
-
-    def hayMensajesPendientes(self, puerto):
-        if puerto == Servidor.puertos_cliente1:
-            if len(self.lista_mensajes1) > 0:
-                return True
-            return False
         else:
+            return self.lista_mensajes1
+
+    def hayMensajesPendientes(self, id):
+        if id == 1:
             if len(self.lista_mensajes2) > 0:
                 return True
             return False
+        else:
+            if len(self.lista_mensajes1) > 0:
+                return True
+            return False
 
-    def mensajeNuevoRecibido(self, mensaje, puerto):
-        print("Mensaje nuevo Recibido, mensaje : " + mensaje)
-        print("Mensaje nuevo Recibido, puerto : " + str(puerto))
-        if puerto == Servidor.puertos_cliente1:
+    def mensajeNuevoRecibido(self, mensaje, id):
+        if id == 1:
             self.lista_mensajes1.append(mensaje)
         else:
             self.lista_mensajes2.append(mensaje)
-        print("lista mensajes 1: " + str(self.lista_mensajes1))
-        print("lista mensajes 2: " + str(self.lista_mensajes2))
 
 class HiloCliente(threading.Thread):
-    def __init__(self, servidor, puertos):
+    def __init__(self, servidor, puertos, id):
         threading.Thread.__init__(self)
+        self.id = id
         self.servidor = servidor
         self.puertos = puertos
         self.socket_recep = socket.socket()
@@ -62,23 +57,15 @@ class HiloCliente(threading.Thread):
         self.socket_envio = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print("Iniciado el servidor de escucha en el puerto "+str(puertos['recv']))
-        
 
     def run(self):
         # Espero la conexion del cliente.
         self.socket_recep.bind(('0.0.0.0', self.puertos['recv']))
         self.socket_recep.listen(1)
         self.cliente, self.direccion = self.socket_recep.accept()
-        if self.puertos == Servidor.puertos_cliente1:
-            self.servidor.direccion_cliente1 = self.direccion
-        else:
-            self.servidor.direccion_cliente2 = self.direccion
         print("Se conecto el stream de entrada del cliente "+self.direccion[0]+" en el puerto "+str(self.puertos['recv']))
         # Me conecto al servidor
-        if self.puertos == Servidor.puertos_cliente1:
-            self.socket_envio.connect((self.servidor.direccion_cliente2, 9091))
-        else:
-            self.socket_envio.connect((self.servidor.direccion_cliente1, 8081))
+        self.socket_envio.connect((self.direccion[0], self.puertos['send']))
         print("Se conectó el stream de envío al cliente "+self.direccion[0]+" en el puerto "+str(self.puertos['send']))
         # A partir de este punto, esta conectado por ambos canales.
         self.hilo_envio = HiloEnvio(self, self.socket_envio)
@@ -89,31 +76,37 @@ class HiloCliente(threading.Thread):
         while True:
             pass
 
+    def hayMensajesPendientes(self):
+        return self.servidor.hayMensajesPendientes(self.id)
+
+    def getMensajesPendientes(self):
+        return self.servidor.getMensajesPendientes(self.id)
+
+    def nuevoMensajeRecibido(self, mensaje):
+        self.servidor.mensajeNuevoRecibido(mensaje, self.id)
+
 class HiloEnvio(threading.Thread):
-    def __init__(self, servidor, socket):
+    def __init__(self, padre, socket):
         threading.Thread.__init__(self)
-        self.servidor = servidor
+        self.padre = padre
         self.socket = socket
         print("## Iniciando el hilo de envío")
 
     def run(self):
         while True:
             time.sleep(1)
-            if self.servidor.servidor.hayMensajesPendientes(self.servidor.puertos):
-                mensajes = self.servidor.servidor.getMensajesPendientes(self.servidor.puertos)
+            if self.padre.hayMensajesPendientes(self.padre.puertos["recv"]):
+                mensajes = self.padre.getMensajesPendientes(self.padre.puertos["recv"])
                 for mensaje in mensajes:
-                    print("Manda: " + str(mensaje.encode()))
                     self.socket.send(mensaje.encode())
-                    print("Mandó: " + str(mensaje.encode()))
-                    mensajes.pop()
             else:
                 print("No hay mensajes pendientes")
 
 
 class HiloRecepcion(threading.Thread):
-    def __init__(self, servidor, socket, cliente):
+    def __init__(self, padre, socket, cliente):
         threading.Thread.__init__(self)
-        self.servidor = servidor
+        self.padre = padre
         self.socket = socket
         self.cliente = cliente
         print("## Iniciando el hilo de recepción")
@@ -121,7 +114,7 @@ class HiloRecepcion(threading.Thread):
     def run(self):
         while True:
             mensaje = self.cliente.recv(1024)
-            self.servidor.servidor.mensajeNuevoRecibido(mensaje.decode(), self.servidor.puertos)
+            #self.padre.mensajeNuevoRecibido(mensaje.decode(), self.padre.puertos["recv"])
             print(mensaje)
 
 
