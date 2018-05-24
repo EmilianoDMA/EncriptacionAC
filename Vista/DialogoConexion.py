@@ -15,8 +15,6 @@ class DialogoConexion(QtWidgets.QDialog):
         self.ventana.deshabilitarVista()
         self.dialogo.ip.setText("localhost")
         self.dialogo.puerto.setText("8080")
-        #self.dialogo.ip.selected.connect(self.limpiezaIP)
-        #self.dialogo.puerto.clicked.connect(self.limpiezaPuerto)
         self.dialogo.botones.accepted.connect(self.conectar)
         self.dialogo.botones.rejected.connect(self.desconectar)
 
