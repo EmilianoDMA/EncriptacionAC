@@ -9,13 +9,21 @@ class Controlador:
         self.modelo.conectar(ip, puerto)
 
     def recibirMensaje(self, mensaje):
-        pass
-        #self.vista.escribirMensajeRecibido(mensaje)
+        self.vista.escribirMensajeRecibido(mensaje)
 
-    def enviarMensaje(self):
+    def enviarMensaje(self, mensaje):
         mensaje = self.vista.getContenidoMensaje()
         self.modelo.enviarMensaje(mensaje)
         self.vista.escribirMensajeEnviado(mensaje)
+
+    def limpiarMensajes(self):
+        self.vista.limpiarMensajes()
+
+    def informarError(self, error):
+        self.vista.informarError(error)
+
+    def deshabilitarVista(self):
+        self.vista.deshabilitarVista()
 
     def desconectar(self):
         self.modelo.desconectar()

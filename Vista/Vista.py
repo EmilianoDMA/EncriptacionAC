@@ -38,6 +38,13 @@ class Vista(QtWidgets.QMainWindow):
         self.ventana.mensajes.clear()
         self.ventana.mensajes.setPlainText(contenido+mensaje+"\n")
 
+    def limpiarMensajes(self):
+        self.ventana.mensajes.clear()
+
+    def informarError(self, error):
+        self.ventana.mensajes.clear()
+        self.ventana.mensajes.setPlainText(error)
+
     def enviarMensaje(self):
         mensaje = self.ventana.escribir.toPlainText()
         self.ventana.escribir.cut()

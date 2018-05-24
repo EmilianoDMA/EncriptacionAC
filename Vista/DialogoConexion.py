@@ -13,6 +13,10 @@ class DialogoConexion(QtWidgets.QDialog):
 
     def initDialogo(self):
         self.ventana.deshabilitarVista()
+        self.dialogo.ip.setText("localhost")
+        self.dialogo.puerto.setText("8080")
+        #self.dialogo.ip.selected.connect(self.limpiezaIP)
+        #self.dialogo.puerto.clicked.connect(self.limpiezaPuerto)
         self.dialogo.botones.accepted.connect(self.conectar)
         self.dialogo.botones.rejected.connect(self.desconectar)
 
@@ -20,6 +24,12 @@ class DialogoConexion(QtWidgets.QDialog):
         ip = self.dialogo.ip.text()
         puerto = int(self.dialogo.puerto.text())
         self.ventana.conectar(ip, puerto)
+
+    def limpiezaIP(self):
+        self.dialogo.ip.clear()
+
+    def limpiezaPuerto(self):
+        self.dialogo.puerto.clear()
 
     def desconectar(self):
         self.ventana.close()

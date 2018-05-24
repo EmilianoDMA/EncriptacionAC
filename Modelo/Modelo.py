@@ -26,19 +26,24 @@ class Modelo:
 
     def conectar(self, ip_servidor, puerto):
         # Me conecto al servidor
-        self.puerto = puerto
-        self.socket_envio.connect((ip_servidor, self.puerto))
-        print("Se conectó el stream de envío hacia "+ip_servidor)
-        # Espero la conexion del cliente.
-        self.socket_recep.bind(('0.0.0.0', self.puerto+1))
-        self.socket_recep.listen(1)
-        self.cliente, self.direccion = self.socket_recep.accept()
-        print("Se conecto el stream de entrada del cliente "+self.direccion[0])
-        # A partir de este punto, esta conectado por ambos canales.
-        self.hilo_envio = HiloEnvio(self, self.socket_envio)
-        self.hilo_recep = HiloRecepcion(self, self.socket_recep, self.cliente)
-        self.hilo_envio.start()
-        self.hilo_recep.start()
+        try:
+            self.puerto = puerto
+            self.socket_envio.connect((ip_servidor, self.puerto))
+            print("Se conectó el stream de envío hacia "+ip_servidor)
+            # Espero la conexion del cliente.
+            self.socket_recep.bind(('0.0.0.0', self.puerto+1))
+            self.socket_recep.listen(1)
+            self.cliente, self.direccion = self.socket_recep.accept()
+            print("Se conecto el stream de entrada del cliente "+self.direccion[0])
+            # A partir de este punto, esta conectado por ambos canales.
+            self.hilo_envio = HiloEnvio(self, self.socket_envio)
+            self.hilo_recep = HiloRecepcion(self, self.socket_recep, self.cliente)
+            self.hilo_envio.start()
+            self.hilo_recep.start()
+            self.controlador.limpiarMensajes()
+        except ConnectionRefusedError:
+            self.controlador.deshabilitarVista()
+            self.controlador.informarError("No se pudo establecer la conexion")
 
     def hayMensajesPendientes(self):
         """
@@ -67,6 +72,9 @@ class Modelo:
         """
         self.lista_mensajes_enviados.append(mensaje)
 
+    def desconectar(self):
+        pass
+
 
 class HiloEnvio(threading.Thread):
     def __init__(self, obj_cliente, socket):
@@ -82,9 +90,9 @@ class HiloEnvio(threading.Thread):
                 mensajes = self.obj_cliente.getMensajesPendientes()
                 print(mensajes)
                 for mensaje in mensajes:
+                    print("Enviando: "+mensaje)
                     self.socket.send(mensaje.encode())
                     mensajes.pop()
-                    print(self.socket)
             else:
                 print("No hay mensajes pendientes")
 
@@ -100,7 +108,6 @@ class HiloRecepcion(threading.Thread):
     def run(self):
         while True:
             mensaje = self.cliente.recv(1024)
-            print("Recibí : " + str(mensaje))
             self.obj_cliente.recibirMensaje(mensaje.decode())
             print("Recibí : " + str(mensaje.decode()))
 

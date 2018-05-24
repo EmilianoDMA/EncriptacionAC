@@ -85,6 +85,7 @@ class HiloCliente(threading.Thread):
     def mensajeNuevoRecibido(self, mensaje):
         self.servidor.mensajeNuevoRecibido(mensaje, self.id)
 
+
 class HiloEnvio(threading.Thread):
     def __init__(self, padre, socket):
         threading.Thread.__init__(self)

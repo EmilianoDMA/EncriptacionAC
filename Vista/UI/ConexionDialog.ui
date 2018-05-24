@@ -32,7 +32,7 @@
   <widget class="QLabel" name="conexion_label">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>140</x>
      <y>10</y>
      <width>68</width>
      <height>19</height>
@@ -40,6 +40,9 @@
    </property>
    <property name="text">
     <string>Conexión</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QFrame" name="caja">
