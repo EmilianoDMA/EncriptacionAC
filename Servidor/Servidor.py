@@ -8,6 +8,11 @@ from Servidor.HiloCliente import HiloCliente
 # TODO: Hay que sacar esto del proyecto cliente a un nuevo proyecto servidor.
 
 class Servidor:
+    """
+    TODO: Nota a futuro porque me quedo sin batería
+    Definir la tupla socket_recv ,socket:snd base y a partir de ahí, asignar a cada dupla de clientes los sockets para
+    que sepan por donde comunicarse (En lugar de los hardcodeados).
+    """
     puertos_cliente1 = {
         'recv': 8080,
         'send': 8081
