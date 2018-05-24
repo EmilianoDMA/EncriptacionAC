@@ -28,17 +28,17 @@ class Servidor:
 
     def getMensajesPendientes(self, puerto):
         if puerto == Servidor.puertos_cliente1:
-            return self.lista_mensajes1
-        else:
             return self.lista_mensajes2
+        else:
+            return self.lista_mensajes1
 
     def hayMensajesPendientes(self, puerto):
         if puerto == Servidor.puertos_cliente1:
-            if len(self.lista_mensajes1) > 0:
+            if len(self.lista_mensajes2) > 0:
                 return True
             return False
         else:
-            if len(self.lista_mensajes2) > 0:
+            if len(self.lista_mensajes1) > 0:
                 return True
             return False
 
@@ -69,16 +69,11 @@ class HiloCliente(threading.Thread):
         self.socket_recep.bind(('0.0.0.0', self.puertos['recv']))
         self.socket_recep.listen(1)
         self.cliente, self.direccion = self.socket_recep.accept()
-        if self.puertos == Servidor.puertos_cliente1:
-            self.servidor.direccion_cliente1 = self.direccion
-        else:
-            self.servidor.direccion_cliente2 = self.direccion
+
         print("Se conecto el stream de entrada del cliente "+self.direccion[0]+" en el puerto "+str(self.puertos['recv']))
         # Me conecto al servidor
-        if self.puertos == Servidor.puertos_cliente1:
-            self.socket_envio.connect((self.servidor.direccion_cliente2, 9091))
-        else:
-            self.socket_envio.connect((self.servidor.direccion_cliente1, 8081))
+        self.socket_envio.connect((self.direccion[0], self.puertos['send']))
+
         print("Se conectó el stream de envío al cliente "+self.direccion[0]+" en el puerto "+str(self.puertos['send']))
         # A partir de este punto, esta conectado por ambos canales.
         self.hilo_envio = HiloEnvio(self, self.socket_envio)

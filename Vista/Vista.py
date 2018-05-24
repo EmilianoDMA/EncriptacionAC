@@ -31,17 +31,16 @@ class Vista(QtWidgets.QMainWindow):
     def escribirMensajeRecibido(self, mensaje):
         contenido = self.ventana.mensajes.toPlainText()
         self.ventana.mensajes.clear()
-        self.ventana.mensajes.setPlainText(contenido+mensaje+"\n")
+        self.ventana.mensajes.setPlainText(contenido+">>>"+mensaje+"\n")
 
     def escribirMensajeEnviado(self, mensaje):
         contenido = self.ventana.mensajes.toPlainText()
         self.ventana.mensajes.clear()
-        self.ventana.mensajes.setPlainText(contenido+mensaje+"\n")
+        self.ventana.mensajes.setPlainText(contenido+">"+mensaje+"\n")
 
     def enviarMensaje(self):
-        mensaje = self.ventana.escribir.toPlainText()
         self.ventana.escribir.cut()
-        self.controlador.enviarMensaje(mensaje)
+        self.controlador.enviarMensaje()
 
     def cerrarConexiones(self):
         self.controlador.desconectar()

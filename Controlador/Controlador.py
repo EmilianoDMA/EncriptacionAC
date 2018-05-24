@@ -9,6 +9,7 @@ class Controlador:
         self.modelo.conectar(ip, puerto)
 
     def recibirMensaje(self, mensaje):
+        print("LLEGO AL CONTROLADOOOOOOOOR")
         pass
         #self.vista.escribirMensajeRecibido(mensaje)
 
