@@ -4,7 +4,7 @@ import sys
 import time
 import socket
 import threading
-from Servidor.HiloCliente import HiloCliente
+from HiloCliente import HiloCliente
 # TODO: Hay que sacar esto del proyecto cliente a un nuevo proyecto servidor.
 
 class Servidor:

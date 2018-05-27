@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import threading, socket
+import socket
+import threading
+from HiloEnvio import HiloEnvio
+from HiloRecepcion import HiloRecepcion
 
 class HiloCliente(threading.Thread):
     def __init__(self, servidor, puertos, id):

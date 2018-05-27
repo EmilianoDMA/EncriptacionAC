@@ -1,7 +1,11 @@
+from PyQt5 import QtCore
 from Modelo import Modelo
 
-class Controlador:
+class Controlador(QtCore.QObject):
+    recibir_mensaje = QtCore.pyqtSignal(str)
+
     def __init__(self, vista):
+        QtCore.QObject.__init__(self)
         self.vista = vista
         self.modelo = Modelo.Modelo(self)
 
@@ -9,7 +13,7 @@ class Controlador:
         self.modelo.conectar(ip, puerto)
 
     def recibirMensaje(self, mensaje):
-        self.vista.escribirMensajeRecibido(mensaje)
+        self.recibir_mensaje.emit(mensaje)
 
     def enviarMensaje(self, mensaje):
         mensaje = self.vista.getContenidoMensaje()

@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
 from Vista.UI import Ventana, ConexionDialog
 from Controlador.Controlador import Controlador
 
@@ -6,6 +7,7 @@ class Vista(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.controlador = Controlador(self)
+        self.controlador.recibir_mensaje.connect(self.escribirMensajeRecibido)
         self.ventana = Ventana.Ui_MainWindow()
         self.ventana.setupUi(self)
         self.inicializaUI()
@@ -28,6 +30,7 @@ class Vista(QtWidgets.QMainWindow):
         self.ventana.escribir.clear()
         return mensaje
 
+    @QtCore.pyqtSlot(str)
     def escribirMensajeRecibido(self, mensaje):
         contenido = self.ventana.mensajes.toPlainText()
         self.ventana.mensajes.clear()
