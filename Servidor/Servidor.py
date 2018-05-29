@@ -10,7 +10,7 @@ from HiloCliente import HiloCliente
 class Servidor:
     """
     TODO: Nota a futuro porque me quedo sin batería
-    Definir la tupla socket_recv ,socket:snd base y a partir de ahí, asignar a cada dupla de clientes los sockets para
+    Definir la tupla socket_recv, socket_snd base y a partir de ahí, asignar a cada dupla de clientes los sockets para
     que sepan por donde comunicarse (En lugar de los hardcodeados).
     """
     puertos_cliente1 = {
@@ -27,15 +27,15 @@ class Servidor:
         self.id_cliente_2 = 2
         self.lista_mensajes1 = []
         self.lista_mensajes2 = []
+        self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1)
+        self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2)
 
         self.start()
 
     def start(self):
-        self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1)
-        self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2)
         self.cliente1.start()
         self.cliente2.start()
-
+ 
     def getMensajesPendientes(self, id):
         if id == 1:
             return self.lista_mensajes2
@@ -53,6 +53,8 @@ class Servidor:
             return False
 
     def mensajeNuevoRecibido(self, mensaje, id):
+        print("El cliente "+str(id)+" envió el mensaje: ")
+        print(mensaje)
         if id == 1:
             self.lista_mensajes1.append(mensaje)
         else:

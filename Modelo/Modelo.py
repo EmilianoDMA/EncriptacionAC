@@ -7,6 +7,8 @@ import socket
 import threading
 from pdb import set_trace
 from time import sleep
+from Modelo.HiloEnvio import HiloEnvio
+from Modelo.HiloRecepcion import HiloRecepcion
 
 
 class Modelo:
@@ -74,38 +76,3 @@ class Modelo:
 
     def desconectar(self):
         pass
-
-
-class HiloEnvio(threading.Thread):
-    def __init__(self, obj_cliente, socket):
-        threading.Thread.__init__(self)
-        self.obj_cliente = obj_cliente
-        self.socket = socket
-        print("## Iniciando el hilo de envío")
-
-    def run(self):
-        while True:
-            time.sleep(1)
-            if self.obj_cliente.hayMensajesPendientes():
-                mensajes = self.obj_cliente.getMensajesPendientes()
-                for mensaje in mensajes:
-                    print("Enviando: "+mensaje)
-                    self.socket.send(mensaje.encode())
-                    mensajes.pop()
-            else:
-                print("No hay mensajes pendientes")
-
-
-class HiloRecepcion(threading.Thread):
-    def __init__(self, obj_cliente, socket, cliente):
-        threading.Thread.__init__(self)
-        self.obj_cliente = obj_cliente
-        self.socket = socket
-        self.cliente = cliente
-        print("## Iniciando el hilo de recepción")
-
-    def run(self):
-        while True:
-            mensaje = self.cliente.recv(1024)
-            self.obj_cliente.recibirMensaje(mensaje.decode())
-            print("Recibí : " + str(mensaje.decode()))

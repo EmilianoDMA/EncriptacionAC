@@ -31,7 +31,7 @@ class HiloCliente(threading.Thread):
         self.hilo_recep = HiloRecepcion(self, self.socket_recep, self.cliente)
         self.hilo_envio.start()
         self.hilo_recep.start()
-        
+
         while True:
             if not self.hilo_envio.is_alive() or not self.hilo_recep.is_alive():
                 break 
