@@ -6,11 +6,14 @@ from HiloEnvio import HiloEnvio
 from HiloRecepcion import HiloRecepcion
 
 class HiloCliente(threading.Thread):
-    def __init__(self, servidor, puertos, id):
+    def __init__(self, servidor, puertos, id, moduloDH, compartidoDH):
         threading.Thread.__init__(self)
         self.id = id
         self.servidor = servidor
         self.puertos = puertos
+        self.moduloDH = moduloDH
+        self.mandarDH = 0
+        self.compartidoDH = compartidoDH
         self.socket_recep = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket_envio = socket.socket()
@@ -27,7 +30,7 @@ class HiloCliente(threading.Thread):
         self.socket_envio.connect((self.direccion[0], self.puertos['send']))
         print("Se conectó el stream de envío al cliente "+self.direccion[0]+" en el puerto "+str(self.puertos['send']))
         # A partir de este punto, esta conectado por ambos canales.
-        self.hilo_envio = HiloEnvio(self, self.socket_envio)
+        self.hilo_envio = HiloEnvio(self, self.socket_envio, self.moduloDH, self.compartidoDH)
         self.hilo_recep = HiloRecepcion(self, self.socket_recep, self.cliente)
         self.hilo_envio.start()
         self.hilo_recep.start()
@@ -44,3 +47,25 @@ class HiloCliente(threading.Thread):
 
     def mensajeNuevoRecibido(self, mensaje):
         self.servidor.mensajeNuevoRecibido(mensaje, self.id)
+
+"""
+    def DiffieHellman(self, numeroComun, modulo):
+        numeroSecreto = random.randint(0,5000)
+        mandar = numeroComun ** numeroSecreto % modulo
+
+        self.socket.send(str(mandar).encode('utf-8'))
+        computar = int(self.socket.recv(1024).decode('utf-8'))
+
+        self.numeroSecretoEnvio = computar**numeroSecreto % modulo
+        return self.numeroSecretoEnvio
+
+
+    def DiffieHellman(self,conn):
+        numeroSecreto = random.randint(0,5000)
+        mandar = numeroComun ** numeroSecreto % modulo
+        
+        computar = int(conn.recv(1024).decode('utf-8'))
+        conn.send(str(mandar).encode('utf-8'))
+
+        self.numeroSecretoRecibo = computar**numeroSecreto % modulo
+"""

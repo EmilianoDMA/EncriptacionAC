@@ -4,6 +4,7 @@ import sys
 import time
 import socket
 import threading
+import random
 from HiloCliente import HiloCliente
 # TODO: Hay que sacar esto del proyecto cliente a un nuevo proyecto servidor.
 
@@ -27,8 +28,11 @@ class Servidor:
         self.id_cliente_2 = 2
         self.lista_mensajes1 = []
         self.lista_mensajes2 = []
-        self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1)
-        self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2)
+        self.moduloDH = random.randint(0,5000)
+        self.nroCompartidoDH = random.randint(0,5000)
+        self.mandarDH = 0
+        self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1, self.moduloDH, self.nroCompartidoDH)
+        self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2, self.moduloDH, self.nroCompartidoDH)
 
         self.start()
 

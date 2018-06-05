@@ -14,7 +14,17 @@ class HiloRecepcion(threading.Thread):
         print("## Iniciando el hilo de recepción")
 
     def run(self):
+        self.padre.mandarDH = self.diffieHellman()
         while True:
             mensaje = self.cliente.recv(1024)
             self.padre.mensajeNuevoRecibido(mensaje.decode())
             print(mensaje)
+
+    #Este es el Diffie-Hellman del Servidor donde SOLO solo recive. 
+    #El servidor no tiene que saber el Nro Secreto, pero elige los numeros acordados a los clientes
+    #El nro secreto se calcula en el Diffie-Hellman de los clientes.
+    def diffieHellman(self):
+        #TODO OJO. si hago que recibe y envia por el mismo hilo, va a estar recibiendo y mandando al mismo cliente.
+        #Recordar las listas implementadas para mensajes. Podría llegar a hacerse algo analogo
+        mandar = int((self.cliente.recv(1024)).decode())
+        return mandar

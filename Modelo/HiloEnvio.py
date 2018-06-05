@@ -12,6 +12,7 @@ class HiloEnvio(threading.Thread):
         print("## Iniciando el hilo de envío")
 
     def run(self):
+        self.diffieHellman()
         while True:
             time.sleep(1)
             if self.obj_cliente.hayMensajesPendientes():
@@ -22,3 +23,10 @@ class HiloEnvio(threading.Thread):
                     mensajes.pop()
             else:
                 print("No hay mensajes pendientes")
+    
+    def diffieHellman(self):
+        while self.obj_cliente.mandarDH == 0:
+            pass
+        self.socket.send((str(self.obj_cliente.mandarDH)).encode())
+
+        
