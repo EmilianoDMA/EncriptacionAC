@@ -31,8 +31,13 @@ class HiloEnvio(threading.Thread):
 #El servidor no tiene que saber el Nro Secreto, pero elige los numeros acordados a los clientes
 #El nro secreto se calcula en el Diffie-Hellman de los clientes.
     def diffieHellman(self, numeroComun, modulo):
-        self.socket.send((str(numeroComun)).encode())
-        self.socket.send((str(modulo)).encode())
+        numerosAcordados = str(numeroComun) + str(modulo)
+        #self.socket.send((str(numeroComun)).encode())
+        #print("MANDAO EL NUMERO COMUN:" + str(numeroComun))
+        #self.socket.send((str(modulo)).encode())
+        #print("el modulo es: " + str(modulo))
+        self.socket.send(numerosAcordados.encode())
+        print("El numero Acordado es: " + numerosAcordados)
         while self.padre.mandarDH == 0:
             pass
         self.socket.send((str(self.padre.mandarDH)).encode())

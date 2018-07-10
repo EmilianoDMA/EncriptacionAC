@@ -28,8 +28,8 @@ class Servidor:
         self.id_cliente_2 = 2
         self.lista_mensajes1 = []
         self.lista_mensajes2 = []
-        self.moduloDH = random.randint(0,5000)
-        self.nroCompartidoDH = random.randint(0,5000)
+        self.moduloDH = random.randint(1000,5000)
+        self.nroCompartidoDH = random.randint(1000,5000)
         self.mandarDH = 0
         self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1, self.moduloDH, self.nroCompartidoDH)
         self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2, self.moduloDH, self.nroCompartidoDH)
