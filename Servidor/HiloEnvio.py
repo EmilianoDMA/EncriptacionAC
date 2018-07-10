@@ -38,6 +38,7 @@ class HiloEnvio(threading.Thread):
         #print("el modulo es: " + str(modulo))
         self.socket.send(numerosAcordados.encode())
         print("El numero Acordado es: " + numerosAcordados)
-        while self.padre.mandarDH == 0:
+        while self.padre.getMandarDH() == 0:
             pass
-        self.socket.send((str(self.padre.mandarDH)).encode())
+        print("CHWQUEO: " + str(self.padre.getMandarDH()))
+        self.socket.send((str(self.padre.getMandarDH())).encode())

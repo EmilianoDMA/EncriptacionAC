@@ -14,7 +14,7 @@ class HiloRecepcion(threading.Thread):
         print("## Iniciando el hilo de recepción")
 
     def run(self):
-        self.padre.mandarDH = self.diffieHellman()
+        self.padre.setMandarDH(self.diffieHellman())
         while True:
             mensaje = self.cliente.recv(1024)
             self.padre.mensajeNuevoRecibido(mensaje.decode())
@@ -26,5 +26,5 @@ class HiloRecepcion(threading.Thread):
     def diffieHellman(self):
         #TODO OJO. si hago que recibe y envia por el mismo hilo, va a estar recibiendo y mandando al mismo cliente.
         #Recordar las listas implementadas para mensajes. Podría llegar a hacerse algo analogo
-        mandar = int((self.cliente.recv(1024)).decode())
-        return mandar
+        calculoIntermedio = int((self.cliente.recv(1024)).decode())
+        return calculoIntermedio

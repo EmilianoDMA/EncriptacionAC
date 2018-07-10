@@ -30,7 +30,8 @@ class Servidor:
         self.lista_mensajes2 = []
         self.moduloDH = random.randint(1000,5000)
         self.nroCompartidoDH = random.randint(1000,5000)
-        self.mandarDH = 0
+        self.mandarDH1 = 0
+        self.mandarDH2 = 0
         self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1, self.moduloDH, self.nroCompartidoDH)
         self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2, self.moduloDH, self.nroCompartidoDH)
 
@@ -63,6 +64,23 @@ class Servidor:
             self.lista_mensajes1.append(mensaje)
         else:
             self.lista_mensajes2.append(mensaje)
+
+    def setMandarDH(self, calc, id):
+        if id == 1:
+            self.mandarDH1 = calc
+        else:
+            self.mandarDH2 = calc
+
+    def getMandarDH(self, id):
+        print("LLEGO AL MDH DEL SERVIRO")
+        if id == 1:
+            print("Llego al get MDH1 y es : " + str(self.mandarDH1))
+            return self.mandarDH2
+        else:
+            print("Llego al get MDH1 y es : " + str(self.mandarDH2)) 
+            return self.mandarDH1
+           
+
 
 
 if __name__ == '__main__':

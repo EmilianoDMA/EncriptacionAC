@@ -42,9 +42,9 @@ class HiloRecepcion(threading.Thread):
         #print("el modulo es: " + str(modulo))
 
 
-        mandar = numeroComun ** numeroSecreto % modulo
-        print("Se va a settear mandarDH (calculo intermedio): " + str(mandar))
-        hilo.obj_cliente.mandarDH = mandar
+        calculoIntermedio = numeroComun ** numeroSecreto % modulo
+        print("Se va a settear mandarDH (calculo intermedio): " + str(calculoIntermedio))
+        hilo.obj_cliente.calculoIntermedio = calculoIntermedio
         print("Seteado")
 
         computar = int(self.cliente.recv(1024).decode())

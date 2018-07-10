@@ -26,6 +26,7 @@ class Modelo:
         self.socket_envio = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.mandarDH = 0
+        self.calculoIntermedio = 0
         self.secretoCompartido = 0
     def conectar(self, ip_servidor, puerto):
         # Me conecto al servidor

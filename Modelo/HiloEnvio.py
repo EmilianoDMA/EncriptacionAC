@@ -25,8 +25,8 @@ class HiloEnvio(threading.Thread):
                 print("No hay mensajes pendientes")
     
     def diffieHellman(self):
-        while self.obj_cliente.mandarDH == 0:
+        while self.obj_cliente.calculoIntermedio == 0:
             pass
-        self.socket.send((str(self.obj_cliente.mandarDH)).encode())
+        self.socket.send((str(self.obj_cliente.calculoIntermedio)).encode())
 
         

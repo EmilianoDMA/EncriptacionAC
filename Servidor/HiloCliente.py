@@ -12,7 +12,7 @@ class HiloCliente(threading.Thread):
         self.servidor = servidor
         self.puertos = puertos
         self.moduloDH = moduloDH
-        self.mandarDH = 0
+        #self.mandarDH = 0
         self.compartidoDH = compartidoDH
         self.socket_recep = socket.socket()
         self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -47,6 +47,13 @@ class HiloCliente(threading.Thread):
 
     def mensajeNuevoRecibido(self, mensaje):
         self.servidor.mensajeNuevoRecibido(mensaje, self.id)
+
+    def setMandarDH(self, calc):
+        self.servidor.setMandarDH(calc, self.id)
+
+    def getMandarDH(self):
+        print("LLEGO AL MDH DEL HILO CLIENTE")
+        return self.servidor.getMandarDH(self.id)
 
 """
     def DiffieHellman(self, numeroComun, modulo):
