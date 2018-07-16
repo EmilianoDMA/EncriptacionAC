@@ -72,12 +72,9 @@ class Servidor:
             self.mandarDH2 = calc
 
     def getMandarDH(self, id):
-        print("LLEGO AL MDH DEL SERVIRO")
         if id == 1:
-            print("Llego al get MDH1 y es : " + str(self.mandarDH1))
             return self.mandarDH2
         else:
-            print("Llego al get MDH1 y es : " + str(self.mandarDH2)) 
             return self.mandarDH1
            
 

@@ -13,16 +13,19 @@ class HiloEnvio(threading.Thread):
 
     def run(self):
         self.diffieHellman()
+        mensajeMostrado = False
         while True:
             time.sleep(1)
             if self.obj_cliente.hayMensajesPendientes():
                 mensajes = self.obj_cliente.getMensajesPendientes()
                 for mensaje in mensajes:
-                    print("Enviando: "+mensaje)
-                    self.socket.send(mensaje.encode())
+                    self.socket.send(mensaje)
                     mensajes.pop()
+                mensajeMostrado = False
             else:
-                print("No hay mensajes pendientes")
+                if mensajeMostrado == False:
+                    print("No hay mensajes pendientes")
+                    mensajeMostrado = True
     
     def diffieHellman(self):
         while self.obj_cliente.calculoIntermedio == 0:

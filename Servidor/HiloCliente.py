@@ -52,7 +52,6 @@ class HiloCliente(threading.Thread):
         self.servidor.setMandarDH(calc, self.id)
 
     def getMandarDH(self):
-        print("LLEGO AL MDH DEL HILO CLIENTE")
         return self.servidor.getMandarDH(self.id)
 
 """

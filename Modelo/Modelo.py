@@ -9,6 +9,7 @@ from pdb import set_trace
 from time import sleep
 from Modelo.HiloEnvio import HiloEnvio
 from Modelo.HiloRecepcion import HiloRecepcion
+import pickle
 
 
 class Modelo:
@@ -28,6 +29,7 @@ class Modelo:
         self.mandarDH = 0
         self.calculoIntermedio = 0
         self.secretoCompartido = 0
+
     def conectar(self, ip_servidor, puerto):
         # Me conecto al servidor
         try:
@@ -63,135 +65,8 @@ class Modelo:
         """
         return self.lista_mensajes_enviados
 
-    def recibirMensaje(self, mensaje):
-        """
-        Ingresa un mensaje nuevo recibido.
-        """
-        self.controlador.recibirMensaje(mensaje)
-        self.lista_mensajes_recibidos.append(mensaje)
-
-    def enviarMensaje(self, mensaje):
-        """
-        Agrega un mensaje a la lista de pendientes de enviar
-        """
-        self.lista_mensajes_enviados.append(mensaje)
-
     def desconectar(self):
         pass
-
-
-"""
-
-    def recibirMensaje(self, conn):
-        #Recibe tiempo que se ejecutará el AC
-        MAX_TIME = int(conn.recv(1024).decode('utf-8'))
-
-        #Recibe estado inicial
-        cellsRecvCifrado = conn.recv((MAX_TIME * 2)+1).decode('utf-8')
-        cellsRecv = bin(int(cellsRecvCifrado) ^ self.numeroSecretoRecibo)
-
-        #Recibe el largo del mensaje encriptado
-        maxLoop = int(conn.recv(1024).decode('utf-8'))
-
-        #Recibe el mensaje encriptado
-        mensajeCifrado = []
-        for x in range(0, maxLoop):
-            aux = int(conn.recv(1024).decode('utf-8'))
-            mensajeCifrado.append(aux)
-
-        #Setea el tiempo recibido y otras variables
-        HALF_SIZE = MAX_TIME
-        indices = range(-HALF_SIZE, HALF_SIZE+1)
-        #Setea el estado inicial recibido para ejecutar el AC
-        cells = {i: '0' for i in indices}
-        cont = 2
-        for i in cells:
-            valor = cellsRecv[cont]
-            cont = cont + 1
-            cells[i] = str(valor)
-        cells[-HALF_SIZE-1] = '0' # Llena ambos extremos
-        cells[ HALF_SIZE+1] = '0'
-        estadoInicial = []
-
-        #Ejecuta el AC y genera la mascara a partir del estado final
-        new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
-        "100": '1', "011": '1', "010": '1', "001": '1'} #Comportamiento que tendrá
-        for time in range(0, MAX_TIME): #Ejecucion
-            patterns = {i: cells[i-1] + cells[i] + cells[i+1] for i in
-                indices}
-            cells = {i: new_state[patterns[i]] for i in indices}
-            cells[-HALF_SIZE-1] = '0'
-            cells[ HALF_SIZE+1] = '0'
-
-        #Pasa la mascara de binario a un arreglo de enteros decimales (tomando de a 8 bits)
-        arregloDividido = []
-        concat = ""
-        bitCant = 1
-        for y in cells:
-            concat =  concat + str(cells[y])
-            if bitCant == 8:
-                arregloDividido.append(concat)
-                bitCant = 0
-                concat = ""
-            bitCant = bitCant + 1
-        mascara = []
-        i = 0
-        for i in arregloDividido:
-            mascara.append(int(i, 2))
-        y = 0
-
-        #DESCIFRADO. Se descifra haciendo XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado, ambos siendo arreglos de enteros decimales.
-        #Se obtiene, asi, el mensaje original en forma de un arreglo de enteros. El contenido de este arreglo son los caracteres del mensaje original en sus valores UTF-8.
-        arregloDescifrado = []
-        indice = 0
-        for m in mensajeCifrado:
-            arregloDescifrado.append((m ^ mascara[indice]))
-            indice = indice + 1
-
-        #Se decodifica el arreglo, obteniendo finalmente el mensaje original.
-        cadena = bytes(arregloDescifrado)
-        textoDescifrado = cadena.decode('utf-8')
-        
-        self.modelo.recibirMensaje(textoDescifrado)
-
-        return True # TODO
-
-    def DiffieHellman(self,conn):
-        numeroSecreto = random.randint(0,5000)
-        numeroComun = int(conn.recv(1024).decode('utf-8'))
-        print("Entrante recibe el primero")
-        modulo = int(conn.recv(1024).decode('utf-8'))
-        print("Entrante recibe el segundo")
-        # RECIBE computar
-        computar = int(conn.recv(1024).decode('utf-8'))
-        mandar = numeroComun ** numeroSecreto % modulo
-        # MANDA mandar
-        print("Entrante va a mandar")
-        conn.send(str(mandar).encode('utf-8'))
-        self.numeroSecretoRecibo = computar**numeroSecreto % modulo
-
-
-
-
-
-
-
-
-    def DiffieHellman(self):
-        numeroComun = random.randint(0,5000)
-        modulo = random.randint(0,5000)
-        numeroSecreto = random.randint(0,5000)
-
-        self.socket.send(numeroComun)
-        self.socket.send(modulo)
-       
-        mandar = numeroComun ** numeroSecreto % modulo
-
-        self.socket.send(str(mandar).encode('utf-8'))
-        # RECIBE computar
-        computar = int(self.socket.recv(1024).decode('utf-8'))
-
-        self.numeroSecretoEnvio = computar**numeroSecreto % modulo
 
     def enviarMensaje(self, mensaje):
         #Recibe el mensaje y lo pasa a un arreglo de int donde cada posicion es un caracter en su valor UTF-8
@@ -248,10 +123,25 @@ class Modelo:
         #CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara y el mensaje (ambos como arreglos de enteros decimales).
         arregloCifrado = []
         indice = 0
+        print("MENSAJE UTF: " + mensajeUTF)
         for m in mensajeUTF:
             arregloCifrado.append((m ^ mascara[indice]))
             indice = indice + 1 
 
+        mensajeArray = []
+        mensajeArray.append(str(MAX_TIME))
+        estadoEnvCifrado = (int(estadoEnvStr,2)) ^ self.secretoCompartido
+        mensajeArray.append(estadoEnvCifrado)
+        mensajeArray.append(str(len(arregloCifrado)))
+        mensajeArray.append(pickle.dumps(arregloCifrado))
+        print("EL MENSAJE CIFRADO ES: " + str(arregloCifrado))
+
+        arregloSerialzado = pickle.dumps(mensajeArray)
+        
+        self.lista_mensajes_enviados.append(arregloSerialzado)
+
+
+        """
         # ENVIO. Envia los datos necesarios al descifrador.
         HOST = self.ip
         PORT = self.puerto
@@ -270,6 +160,132 @@ class Modelo:
 
         #Envia mensaje cifrado
         for i in arregloCifrado:
-            self.socket.send(str(i).encode('utf-8'))
+            self.socket.send(str(i).encode('utf-8')) 
             sleep( 0.01 ) #TODO implementar una sincronización correcta
+        """
+
+        """
+            def enviarMensaje(self, mensaje):
+                #Agrega un mensaje a la lista de pendientes de enviar
+                self.lista_mensajes_enviados.append(mensaje)
+        """
+
+    def recibirMensaje(self, arregloSerialzado):
+        #Recibe tiempo que se ejecutará el AC
+
+        arregloMensaje = pickle.loads(arregloSerialzado)
+
+        MAX_TIME = int(arregloMensaje[0])
+
+        #Recibe estado inicial
+        cellsRecvCifrado = arregloMensaje[1]
+        cellsRecv = bin(int(cellsRecvCifrado) ^ self.secretoCompartido)
+
+        #Recibe el largo del mensaje encriptado
+        maxLoop = int(arregloMensaje[2])
+
+        #Recibe el mensaje encriptado
+        mensajeCifrado = pickle.loads(arregloMensaje[3])
+        print("EL MENSAJE CIFRADO ES: " + str(mensajeCifrado))
+
+        #Setea el tiempo recibido y otras variables
+        HALF_SIZE = MAX_TIME
+        indices = range(-HALF_SIZE, HALF_SIZE+1)
+        #Setea el estado inicial recibido para ejecutar el AC
+        cells = {i: '0' for i in indices}
+        cont = 2
+        for i in cells:
+            valor = cellsRecv[cont]
+            cont = cont + 1
+            cells[i] = str(valor)
+        cells[-HALF_SIZE-1] = '0' # Llena ambos extremos
+        cells[ HALF_SIZE+1] = '0'
+        estadoInicial = []
+
+        #Ejecuta el AC y genera la mascara a partir del estado final
+        new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
+        "100": '1', "011": '1', "010": '1', "001": '1'} #Comportamiento que tendrá
+        for time in range(0, MAX_TIME): #Ejecucion
+            patterns = {i: cells[i-1] + cells[i] + cells[i+1] for i in
+                indices}
+            cells = {i: new_state[patterns[i]] for i in indices}
+            cells[-HALF_SIZE-1] = '0'
+            cells[ HALF_SIZE+1] = '0'
+
+        #Pasa la mascara de binario a un arreglo de enteros decimales (tomando de a 8 bits)
+        arregloDividido = []
+        concat = ""
+        bitCant = 1
+        for y in cells:
+            concat =  concat + str(cells[y])
+            if bitCant == 8:
+                arregloDividido.append(concat)
+                bitCant = 0
+                concat = ""
+            bitCant = bitCant + 1
+        mascara = []
+        i = 0
+        for i in arregloDividido:
+            mascara.append(int(i, 2))
+        y = 0
+
+        #DESCIFRADO. Se descifra haciendo XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado, ambos siendo arreglos de enteros decimales.
+        #Se obtiene, asi, el mensaje original en forma de un arreglo de enteros. El contenido de este arreglo son los caracteres del mensaje original en sus valores UTF-8.
+        arregloDescifrado = []
+        indice = 0
+
+        for m in mensajeCifrado:
+            arregloDescifrado.append((m ^ mascara[indice]))
+            indice = indice + 1
+
+        #Se decodifica el arreglo, obteniendo finalmente el mensaje original.
+        print("EL ARREGLO DESCIFRADO ES : " + str(arregloDescifrado))
+        cadena = bytes(arregloDescifrado)
+        print("LA CADENA ES: " + str(cadena))
+        textoDescifrado = cadena.decode('utf-8')
+        print("EL TEXTO DESCIFRADO ES : " + str(textoDescifrado))
+        
+        self.controlador.recibirMensaje(textoDescifrado)
+
+        return True # TODO
+
+
+"""
+    def recibirMensaje(self, mensaje):
+        #Ingresa un mensaje nuevo recibido.
+        self.controlador.recibirMensaje(mensaje)
+        self.lista_mensajes_recibidos.append(mensaje)
+"""
+
+"""
+    def DiffieHellman(self,conn):
+        numeroSecreto = random.randint(0,5000)
+        numeroComun = int(conn.recv(1024).decode('utf-8'))
+        print("Entrante recibe el primero")
+        modulo = int(conn.recv(1024).decode('utf-8'))
+        print("Entrante recibe el segundo")
+        # RECIBE computar
+        computar = int(conn.recv(1024).decode('utf-8'))
+        mandar = numeroComun ** numeroSecreto % modulo
+        # MANDA mandar
+        print("Entrante va a mandar")
+        conn.send(str(mandar).encode('utf-8'))
+        self.numeroSecretoRecibo = computar**numeroSecreto % modulo
+
+    def DiffieHellman(self):
+        numeroComun = random.randint(0,5000)
+        modulo = random.randint(0,5000)
+        numeroSecreto = random.randint(0,5000)
+
+        self.socket.send(numeroComun)
+        self.socket.send(modulo)
+       
+        mandar = numeroComun ** numeroSecreto % modulo
+
+        self.socket.send(str(mandar).encode('utf-8'))
+        # RECIBE computar
+        computar = int(self.socket.recv(1024).decode('utf-8'))
+
+        self.numeroSecretoEnvio = computar**numeroSecreto % modulo
+
 """

@@ -22,7 +22,7 @@ class HiloEnvio(threading.Thread):
                 mensajes = self.padre.getMensajesPendientes()
                 print("Hay "+str(len(mensajes))+" mensajes pendientes para el cliente "+str(self.padre.id))
                 for mensaje in mensajes:
-                    self.socket.send(mensaje.encode())
+                    self.socket.send(mensaje)
                     mensajes.pop()
             else:
                 print("No hay mensajes pendientes para el cliente "+str(self.padre.id))
@@ -40,5 +40,4 @@ class HiloEnvio(threading.Thread):
         print("El numero Acordado es: " + numerosAcordados)
         while self.padre.getMandarDH() == 0:
             pass
-        print("CHWQUEO: " + str(self.padre.getMandarDH()))
         self.socket.send((str(self.padre.getMandarDH())).encode())

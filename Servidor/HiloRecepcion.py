@@ -17,7 +17,7 @@ class HiloRecepcion(threading.Thread):
         self.padre.setMandarDH(self.diffieHellman())
         while True:
             mensaje = self.cliente.recv(1024)
-            self.padre.mensajeNuevoRecibido(mensaje.decode())
+            self.padre.mensajeNuevoRecibido(mensaje)
             print(mensaje)
 
     #Este es el Diffie-Hellman del Servidor donde SOLO solo recive. 

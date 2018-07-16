@@ -18,8 +18,9 @@ class HiloRecepcion(threading.Thread):
         print("El secreto compartido es: " + str(self.obj_cliente.secretoCompartido))
         while True:
             mensaje = self.cliente.recv(1024)
-            self.obj_cliente.recibirMensaje(mensaje.decode())
-            print("Recibí : " + str(mensaje.decode()))
+            #self.obj_cliente.recibirMensaje(mensaje.decode())
+            self.obj_cliente.recibirMensaje(mensaje)
+            print("Recibí : " + str(mensaje))
 
     #Este es el Diffie-Hellman del Cliente. 
     #El cliente recibe los numeros acordados por el servidor
@@ -48,7 +49,6 @@ class HiloRecepcion(threading.Thread):
         print("Seteado")
 
         computar = int(self.cliente.recv(1024).decode())
-        print("EN COMPUTAR ESTA RECIBIENDO:" + str(computar))
 
         secretoCompartido = computar**numeroSecreto % modulo
         return secretoCompartido
