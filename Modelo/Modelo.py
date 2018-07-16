@@ -123,7 +123,6 @@ class Modelo:
         #CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara y el mensaje (ambos como arreglos de enteros decimales).
         arregloCifrado = []
         indice = 0
-        print("MENSAJE UTF: " + mensajeUTF)
         for m in mensajeUTF:
             arregloCifrado.append((m ^ mascara[indice]))
             indice = indice + 1 
