@@ -22,10 +22,10 @@ class Modelo:
         self.controlador = controlador
         self.lista_mensajes_enviados = []
         self.lista_mensajes_recibidos = []
-        self.socket_recep = socket.socket()
-        self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket_envio = socket.socket()
-        self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket_recep = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket_envio = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.mandarDH = 0
         self.calculoIntermedio = 0
         self.secretoCompartido = 0
@@ -86,11 +86,6 @@ class Modelo:
         cells[ HALF_SIZE+1] = '0'
         estadoInicial = []
         estadoInicial = cells #Guarda el estado inicial
-        #Convierte el estado inicial a Str para que sea más facil la interpretación en pasos posteriores.
-        estadoEnv = []
-        for i in estadoInicial:
-            estadoEnv.append(estadoInicial[i])
-        estadoEnvStr = ''.join(estadoEnv)
 
         #Ejecuta el AC
         new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
@@ -123,17 +118,33 @@ class Modelo:
         #CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara y el mensaje (ambos como arreglos de enteros decimales).
         arregloCifrado = []
         indice = 0
+        print("MENSAJE UTF: " + str(mensajeUTF))
+        print("LA MASCARA ES: " + str(mascara))
         for m in mensajeUTF:
             arregloCifrado.append((m ^ mascara[indice]))
             indice = indice + 1 
 
         mensajeArray = []
         mensajeArray.append(str(MAX_TIME))
-        estadoEnvCifrado = (int(estadoEnvStr,2)) ^ self.secretoCompartido
-        mensajeArray.append(estadoEnvCifrado)
+        #estadoEnvCifrado = (int(estadoEnvStr,2)) ^ self.secretoCompartido
+
+        secretoCompartidoBits = bin(self.secretoCompartido)
+        print("SECRETO COMPARTIDO BITS : " + str(secretoCompartidoBits))
+        print("ESTADO INICIAL viejo: " + str(estadoInicial))
+        v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
+        for b in estadoInicial:
+            estadoInicial[b] = int(estadoInicial[b]) ^ int(secretoCompartidoBits[v])
+            v = v + 1
+            if v == len(secretoCompartidoBits):
+                v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
+        print("ESTADO INICIAL NUEVO: " + str(estadoInicial))
+
+        mensajeArray.append(pickle.dumps(estadoInicial)) 
         mensajeArray.append(str(len(arregloCifrado)))
         mensajeArray.append(pickle.dumps(arregloCifrado))
         print("EL MENSAJE CIFRADO ES: " + str(arregloCifrado))
+        #print("EL ESTADO INICIAL ENVIADO ES: " + str(estadoEnvCifrado))
+        #print("EL ESTADO INICIAL ORIGINAL ES: " + estadoEnvStr)
 
         arregloSerialzado = pickle.dumps(mensajeArray)
         
@@ -177,9 +188,24 @@ class Modelo:
         MAX_TIME = int(arregloMensaje[0])
 
         #Recibe estado inicial
-        cellsRecvCifrado = arregloMensaje[1]
-        cellsRecv = bin(int(cellsRecvCifrado) ^ self.secretoCompartido)
+        estadoInicial = pickle.loads(arregloMensaje[1])
 
+        secretoCompartidoBits = bin(self.secretoCompartido)
+        print("SECRETO COMPARTIDO BITS : " + str(secretoCompartidoBits))
+        print("ESTADO INICIAL viejo: " + str(estadoInicial))
+        v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
+        for b in estadoInicial:
+            estadoInicial[b] = str(int(estadoInicial[b]) ^ int(secretoCompartidoBits[v]))
+            v = v + 1
+            if v == len(secretoCompartidoBits):
+                v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
+        print("ESTADO INICIAL NUEVO: " + str(estadoInicial))
+
+        #cellsRecvCifrado = arregloMensaje[1]
+        #cellsRecv = bin(int(cellsRecvCifrado) ^ self.secretoCompartido)
+
+        #print("EL ESTADO INICIAL RECIBIDO ES: " + str(cellsRecvCifrado))
+        #print("EL ESTADO INICIAL ORIGINAL ES: " + str(cellsRecv))
         #Recibe el largo del mensaje encriptado
         maxLoop = int(arregloMensaje[2])
 
@@ -191,16 +217,8 @@ class Modelo:
         HALF_SIZE = MAX_TIME
         indices = range(-HALF_SIZE, HALF_SIZE+1)
         #Setea el estado inicial recibido para ejecutar el AC
-        cells = {i: '0' for i in indices}
-        cont = 2
-        for i in cells:
-            valor = cellsRecv[cont]
-            cont = cont + 1
-            cells[i] = str(valor)
-        cells[-HALF_SIZE-1] = '0' # Llena ambos extremos
-        cells[ HALF_SIZE+1] = '0'
-        estadoInicial = []
-
+      
+        cells = estadoInicial
         #Ejecuta el AC y genera la mascara a partir del estado final
         new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
         "100": '1', "011": '1', "010": '1', "001": '1'} #Comportamiento que tendrá

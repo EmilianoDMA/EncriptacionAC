@@ -16,7 +16,7 @@ class HiloRecepcion(threading.Thread):
     def run(self):
         self.padre.setMandarDH(self.diffieHellman())
         while True:
-            mensaje = self.cliente.recv(1024)
+            mensaje = self.cliente.recv(90000)
             self.padre.mensajeNuevoRecibido(mensaje)
             print(mensaje)
 
