@@ -78,6 +78,9 @@ class Modelo:
         indices = range(-HALF_SIZE, HALF_SIZE+1)
 
         #Genera un estado inicial aleatorio en Cells para el AC
+        print("\n ************ Nuevo Mensaje a Enviar ************")
+        print("El mensaje a enviar es: " + mensaje)
+        print("Se generará un estado inicial aleatorio para el automata")
         cells = {i: '0' for i in indices}
         for i in cells:
             azar = random.randint(0,1)
@@ -86,8 +89,10 @@ class Modelo:
         cells[ HALF_SIZE+1] = '0'
         estadoInicial = []
         estadoInicial = cells #Guarda el estado inicial
+        print("El Estado Inicial generado aleatoriamente para del automata es: " + str(estadoInicial))
 
         #Ejecuta el AC
+        print("******** EJECUTANDO EL AUTOMATA CELULAR ********")
         new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
                     "100": '1', "011": '1', "010": '1', "001": '1'} #Comportamiento que tendrá
         for time in range(0, MAX_TIME): #Ejecucion
@@ -96,7 +101,7 @@ class Modelo:
             cells = {i: new_state[patterns[i]] for i in indices}
             cells[-HALF_SIZE-1] = '0'
             cells[ HALF_SIZE+1] = '0'
-
+        print("LISTO")
         #Creación de la máscara a partir del último estado (cells) del AC. La mascara es un arreglo de enteros decimales.
         #Para crear la máscara, se utiliza Cells (binario) tomando de a 8 bits y se pasandolos a su equivalente decimal dando como resultado un arreglo.
         arregloDividido = []
@@ -116,69 +121,41 @@ class Modelo:
         y = 0
 
         #CIFRADO. Se cifra haciendo un XOR elemento a elemento entre la mascara y el mensaje (ambos como arreglos de enteros decimales).
+        print("Se cifrará el mensaje a enviar utilizando el último estado del AC para generar una máscara")
         arregloCifrado = []
         indice = 0
-        print("MENSAJE UTF: " + str(mensajeUTF))
-        print("LA MASCARA ES: " + str(mascara))
+        print("El mensaje a cifrar en UTF es: " + str(mensajeUTF))
+        print("La máscara generada por el automata es: " + str(mascara))
         for m in mensajeUTF:
             arregloCifrado.append((m ^ mascara[indice]))
             indice = indice + 1 
+        print("** CIFRADO **")
+        print("EL MENSAJE CIFRADO ES: " + str(arregloCifrado) + "\n")
 
         mensajeArray = []
         mensajeArray.append(str(MAX_TIME))
         #estadoEnvCifrado = (int(estadoEnvStr,2)) ^ self.secretoCompartido
 
         secretoCompartidoBits = bin(self.secretoCompartido)
-        print("SECRETO COMPARTIDO BITS : " + str(secretoCompartidoBits))
-        print("ESTADO INICIAL viejo: " + str(estadoInicial))
+        print("El Secreto Compartido expresado en bits es: " + str(secretoCompartidoBits))
+        print("SE CIFRARÁ EL ESTADO INICIAL CON EL SECRETO COMPARTIDO ACORDADO POR DIFFIE-HELLMAN PARA ENVIARLO POR LA RED")
         v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
         for b in estadoInicial:
             estadoInicial[b] = int(estadoInicial[b]) ^ int(secretoCompartidoBits[v])
             v = v + 1
             if v == len(secretoCompartidoBits):
                 v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
-        print("ESTADO INICIAL NUEVO: " + str(estadoInicial))
+        print("El Estado Inicial cifrado es: " + str(estadoInicial))
 
         mensajeArray.append(pickle.dumps(estadoInicial)) 
         mensajeArray.append(str(len(arregloCifrado)))
         mensajeArray.append(pickle.dumps(arregloCifrado))
-        print("EL MENSAJE CIFRADO ES: " + str(arregloCifrado))
-        #print("EL ESTADO INICIAL ENVIADO ES: " + str(estadoEnvCifrado))
-        #print("EL ESTADO INICIAL ORIGINAL ES: " + estadoEnvStr)
 
         arregloSerialzado = pickle.dumps(mensajeArray)
         
+        print("** Enviando el mensaje cifrado junto con el estado inicial del AC cifrado y otros datos para el descifrado del mensaje **")
         self.lista_mensajes_enviados.append(arregloSerialzado)
-
-
-        """
-        # ENVIO. Envia los datos necesarios al descifrador.
-        HOST = self.ip
-        PORT = self.puerto
-
-        #Envia tiempo que se ejecuto el AC
-        self.socket.send(str(MAX_TIME).encode('utf-8'))
-
-        #Envia estado inicial
-
-        estadoEnvCifrado = (int(estadoEnvStr,2)) ^ self.numeroSecretoEnvio
-        self.socket.send(estadoEnvCifrado.encode('utf-8')) 
-
-
-        #Envia largo del texto cifrado
-        self.socket.send(str(len(arregloCifrado)).encode('utf-8'))
-
-        #Envia mensaje cifrado
-        for i in arregloCifrado:
-            self.socket.send(str(i).encode('utf-8')) 
-            sleep( 0.01 ) #TODO implementar una sincronización correcta
-        """
-
-        """
-            def enviarMensaje(self, mensaje):
-                #Agrega un mensaje a la lista de pendientes de enviar
-                self.lista_mensajes_enviados.append(mensaje)
-        """
+        print("************ Fin proceso de envío ************\n")
 
     def recibirMensaje(self, arregloSerialzado):
         #Recibe tiempo que se ejecutará el AC
@@ -189,35 +166,31 @@ class Modelo:
 
         #Recibe estado inicial
         estadoInicial = pickle.loads(arregloMensaje[1])
-
         secretoCompartidoBits = bin(self.secretoCompartido)
-        print("SECRETO COMPARTIDO BITS : " + str(secretoCompartidoBits))
-        print("ESTADO INICIAL viejo: " + str(estadoInicial))
+        print("El Secreto Compartido expresado en bits es: " + str(secretoCompartidoBits))
+        print("SE DESCIFRARÁ EL ESTADO INICIAL CON EL SECRETO COMPARTIDO ACORDADO POR DIFFIE-HELLMAN PARA RECREAR EL AC")
         v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
+        print("El Estado Inicial cifrado es: " + str(estadoInicial))
         for b in estadoInicial:
             estadoInicial[b] = str(int(estadoInicial[b]) ^ int(secretoCompartidoBits[v]))
             v = v + 1
             if v == len(secretoCompartidoBits):
                 v = 2 #Inicia en 2 porque el str del binario da en formato 0bxxxxx y debemos omitir el "0b"
-        print("ESTADO INICIAL NUEVO: " + str(estadoInicial))
+        print("El Estado Inicial descifrado es: " + str(estadoInicial))
 
-        #cellsRecvCifrado = arregloMensaje[1]
-        #cellsRecv = bin(int(cellsRecvCifrado) ^ self.secretoCompartido)
-
-        #print("EL ESTADO INICIAL RECIBIDO ES: " + str(cellsRecvCifrado))
-        #print("EL ESTADO INICIAL ORIGINAL ES: " + str(cellsRecv))
         #Recibe el largo del mensaje encriptado
         maxLoop = int(arregloMensaje[2])
 
         #Recibe el mensaje encriptado
         mensajeCifrado = pickle.loads(arregloMensaje[3])
-        print("EL MENSAJE CIFRADO ES: " + str(mensajeCifrado))
+        print("El mensaje cifrado recibido es: " + str(mensajeCifrado))
 
         #Setea el tiempo recibido y otras variables
         HALF_SIZE = MAX_TIME
         indices = range(-HALF_SIZE, HALF_SIZE+1)
         #Setea el estado inicial recibido para ejecutar el AC
       
+        print("******** EJECUTANDO EL AUTOMATA CELULAR ********")
         cells = estadoInicial
         #Ejecuta el AC y genera la mascara a partir del estado final
         new_state = {"111": '0', "110": '0', "101": '0', "000": '0',
@@ -228,7 +201,8 @@ class Modelo:
             cells = {i: new_state[patterns[i]] for i in indices}
             cells[-HALF_SIZE-1] = '0'
             cells[ HALF_SIZE+1] = '0'
-
+        print("LISTO")
+        print("Se descifrará el mensaje utilizando el último estado del AC recreado para generar una máscara")
         #Pasa la mascara de binario a un arreglo de enteros decimales (tomando de a 8 bits)
         arregloDividido = []
         concat = ""
@@ -246,6 +220,9 @@ class Modelo:
             mascara.append(int(i, 2))
         y = 0
 
+        print("La máscara generada por el automata es: " + str(mascara))
+
+
         #DESCIFRADO. Se descifra haciendo XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado, ambos siendo arreglos de enteros decimales.
         #Se obtiene, asi, el mensaje original en forma de un arreglo de enteros. El contenido de este arreglo son los caracteres del mensaje original en sus valores UTF-8.
         arregloDescifrado = []
@@ -254,55 +231,16 @@ class Modelo:
         for m in mensajeCifrado:
             arregloDescifrado.append((m ^ mascara[indice]))
             indice = indice + 1
+        
+        print("**DESCIFRADO**")
 
         #Se decodifica el arreglo, obteniendo finalmente el mensaje original.
-        print("EL ARREGLO DESCIFRADO ES : " + str(arregloDescifrado))
+        print("El mensaje descifrado en UTF es: " + str(arregloDescifrado))
         cadena = bytes(arregloDescifrado)
-        print("LA CADENA ES: " + str(cadena))
         textoDescifrado = cadena.decode('utf-8')
-        print("EL TEXTO DESCIFRADO ES : " + str(textoDescifrado))
+        print("El mensaje descifrado es: " + str(textoDescifrado))
         
         self.controlador.recibirMensaje(textoDescifrado)
+        print("************ Fin proceso de recepción ************")
 
         return True # TODO
-
-
-"""
-    def recibirMensaje(self, mensaje):
-        #Ingresa un mensaje nuevo recibido.
-        self.controlador.recibirMensaje(mensaje)
-        self.lista_mensajes_recibidos.append(mensaje)
-"""
-
-"""
-    def DiffieHellman(self,conn):
-        numeroSecreto = random.randint(0,5000)
-        numeroComun = int(conn.recv(1024).decode('utf-8'))
-        print("Entrante recibe el primero")
-        modulo = int(conn.recv(1024).decode('utf-8'))
-        print("Entrante recibe el segundo")
-        # RECIBE computar
-        computar = int(conn.recv(1024).decode('utf-8'))
-        mandar = numeroComun ** numeroSecreto % modulo
-        # MANDA mandar
-        print("Entrante va a mandar")
-        conn.send(str(mandar).encode('utf-8'))
-        self.numeroSecretoRecibo = computar**numeroSecreto % modulo
-
-    def DiffieHellman(self):
-        numeroComun = random.randint(0,5000)
-        modulo = random.randint(0,5000)
-        numeroSecreto = random.randint(0,5000)
-
-        self.socket.send(numeroComun)
-        self.socket.send(modulo)
-       
-        mandar = numeroComun ** numeroSecreto % modulo
-
-        self.socket.send(str(mandar).encode('utf-8'))
-        # RECIBE computar
-        computar = int(self.socket.recv(1024).decode('utf-8'))
-
-        self.numeroSecretoEnvio = computar**numeroSecreto % modulo
-
-"""

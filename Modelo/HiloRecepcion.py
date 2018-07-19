@@ -15,38 +15,35 @@ class HiloRecepcion(threading.Thread):
 
     def run(self):
         self.obj_cliente.secretoCompartido = self.diffieHellman(self)
+        print("Calculo finalizado.")
         print("El secreto compartido es: " + str(self.obj_cliente.secretoCompartido))
+        print("******* Fin Diffie-Hellman ********\n")
+        print("******* Conexión con el usuario establecida ********\n")
         while True:
             mensaje = self.cliente.recv(90000)
             #self.obj_cliente.recibirMensaje(mensaje.decode())
-            self.obj_cliente.recibirMensaje(mensaje)
+            print(" ************ Nuevo Mensaje Recibido ************")
             print("Recibí : " + str(mensaje))
+            self.obj_cliente.recibirMensaje(mensaje)
+            
 
     #Este es el Diffie-Hellman del Cliente. 
     #El cliente recibe los numeros acordados por el servidor
     #El nro secreto se calcula en el Diffie-Hellman de los clientes.    
     def diffieHellman(self, hilo):
+        print("\n******* Inicio Diffie-Hellman ********")
         numeroSecreto = random.randint(0,5000)
         print("Mi numero secreto es: " + str(numeroSecreto))
         
         numerosAcordados = self.cliente.recv(1024).decode()
-        print("Los numeros acordados son: " + numerosAcordados)
 
         numeroComun = int(numerosAcordados[0:4])
-        print("El numero comun es: " + str(numeroComun))
+        print("El numero común es: " + str(numeroComun))
         modulo = int(numerosAcordados[4:8])
-        print("el modulo es: " + str(modulo))
-
-        #numeroComun = int(self.cliente.recv(1024).decode())
-        #print("El numero comun es: " + str(numeroComun))
-        #modulo = int(self.cliente.recv(1024).decode())
-        #print("el modulo es: " + str(modulo))
-
+        print("El modulo acordado es: " + str(modulo))
 
         calculoIntermedio = numeroComun ** numeroSecreto % modulo
-        print("Se va a settear mandarDH (calculo intermedio): " + str(calculoIntermedio))
         hilo.obj_cliente.calculoIntermedio = calculoIntermedio
-        print("Seteado")
 
         computar = int(self.cliente.recv(1024).decode())
 

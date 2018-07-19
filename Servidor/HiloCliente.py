@@ -53,25 +53,3 @@ class HiloCliente(threading.Thread):
 
     def getMandarDH(self):
         return self.servidor.getMandarDH(self.id)
-
-"""
-    def DiffieHellman(self, numeroComun, modulo):
-        numeroSecreto = random.randint(0,5000)
-        mandar = numeroComun ** numeroSecreto % modulo
-
-        self.socket.send(str(mandar).encode('utf-8'))
-        computar = int(self.socket.recv(1024).decode('utf-8'))
-
-        self.numeroSecretoEnvio = computar**numeroSecreto % modulo
-        return self.numeroSecretoEnvio
-
-
-    def DiffieHellman(self,conn):
-        numeroSecreto = random.randint(0,5000)
-        mandar = numeroComun ** numeroSecreto % modulo
-        
-        computar = int(conn.recv(1024).decode('utf-8'))
-        conn.send(str(mandar).encode('utf-8'))
-
-        self.numeroSecretoRecibo = computar**numeroSecreto % modulo
-"""
