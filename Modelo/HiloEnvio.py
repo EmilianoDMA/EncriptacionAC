@@ -32,4 +32,5 @@ class HiloEnvio(threading.Thread):
             pass
         self.socket.send((str(self.obj_cliente.calculoIntermedio)).encode())
 
-        
+    def desconectar(self):
+        self.socket.close()

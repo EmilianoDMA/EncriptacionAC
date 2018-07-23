@@ -25,7 +25,6 @@ class HiloRecepcion(threading.Thread):
             print(" ************ Nuevo Mensaje Recibido ************")
             print("Recibí : " + str(mensaje))
             self.obj_cliente.recibirMensaje(mensaje)
-            
 
     #Este es el Diffie-Hellman del Cliente. 
     #El cliente recibe los numeros acordados por el servidor
@@ -49,3 +48,6 @@ class HiloRecepcion(threading.Thread):
 
         secretoCompartido = computar**numeroSecreto % modulo
         return secretoCompartido
+
+    def desconectar(self):
+        self.socket.close()

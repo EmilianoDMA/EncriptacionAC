@@ -1,3 +1,4 @@
+import socket
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from Vista.UI import Ventana, ConexionDialog
@@ -16,14 +17,19 @@ class Vista(QtWidgets.QMainWindow):
     def inicializaUI(self):
         self.ventana.mensajes.setReadOnly(True)
         self.ventana.enviar.clicked.connect(self.controlador.enviarMensaje)
+        self.ventana.actionConectar.triggered.connect(self.conectar)
+        self.ventana.actionDesconectar.triggered.connect(self.cerrarConexiones)
+        self.ventana.actionSalir.triggered.connect(self.salir)
 
     def deshabilitarVista(self):
         self.ventana.escribir.setReadOnly(True)
         self.ventana.enviar.setEnabled(False)
+        self.ventana.menuOpciones.setEnabled(False)
 
     def habilitarVista(self):
         self.ventana.escribir.setReadOnly(False)
         self.ventana.enviar.setEnabled(True)
+        self.ventana.menuOpciones.setEnabled(True)
 
     def getContenidoMensaje(self):
         mensaje = self.ventana.escribir.toPlainText()
@@ -52,9 +58,25 @@ class Vista(QtWidgets.QMainWindow):
         self.ventana.escribir.cut()
         self.controlador.enviarMensaje()
 
+    def obtenerPuerto(self, ip):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Pedimos al servidor un puerto libre
+        sock.connect((ip, 9000))
+        sock.send('conn'.encode())
+        puerto = sock.recv(1024)
+        # TODO Validar que el puerto sea valido
+        print(puerto)
+        sock.close()
+
+        return int(puerto.decode())
+
+    def conectar(self, ip):
+        self.controlador.conectar(ip, self.obtenerPuerto(ip))
+        self.habilitarVista()
+
     def cerrarConexiones(self):
         self.controlador.desconectar()
 
-    def conectar(self, ip, puerto):
-        self.controlador.conectar(ip, puerto)
-        self.habilitarVista()
+    def salir(self):
+        self.cerrarConexiones()
+        self.close()

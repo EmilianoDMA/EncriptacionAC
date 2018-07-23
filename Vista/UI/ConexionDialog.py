@@ -29,15 +29,9 @@ class Ui_ConexionDialog(object):
         self.ip_label = QtWidgets.QLabel(self.caja)
         self.ip_label.setGeometry(QtCore.QRect(20, 10, 111, 21))
         self.ip_label.setObjectName("ip_label")
-        self.puerto_label = QtWidgets.QLabel(self.caja)
-        self.puerto_label.setGeometry(QtCore.QRect(20, 40, 111, 21))
-        self.puerto_label.setObjectName("puerto_label")
         self.ip = QtWidgets.QLineEdit(self.caja)
         self.ip.setGeometry(QtCore.QRect(150, 10, 151, 21))
         self.ip.setObjectName("ip")
-        self.puerto = QtWidgets.QLineEdit(self.caja)
-        self.puerto.setGeometry(QtCore.QRect(150, 40, 151, 21))
-        self.puerto.setObjectName("puerto")
 
         self.retranslateUi(ConexionDialog)
         self.botones.accepted.connect(ConexionDialog.accept)
@@ -49,5 +43,4 @@ class Ui_ConexionDialog(object):
         ConexionDialog.setWindowTitle(_translate("ConexionDialog", "Dialog"))
         self.conexion_label.setText(_translate("ConexionDialog", "Conexión"))
         self.ip_label.setText(_translate("ConexionDialog", "Dirección IP: "))
-        self.puerto_label.setText(_translate("ConexionDialog", "Puerto:"))
 

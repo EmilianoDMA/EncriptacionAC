@@ -22,10 +22,10 @@ class Modelo:
         self.controlador = controlador
         self.lista_mensajes_enviados = []
         self.lista_mensajes_recibidos = []
-        self.socket_recep = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket_envio = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket_recep = socket.socket()
+        self.socket_recep.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket_envio = socket.socket()
+        self.socket_envio.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.mandarDH = 0
         self.calculoIntermedio = 0
         self.secretoCompartido = 0
@@ -64,9 +64,6 @@ class Modelo:
         Devuelve los mensajes pendientes de envío.
         """
         return self.lista_mensajes_enviados
-
-    def desconectar(self):
-        pass
 
     def enviarMensaje(self, mensaje):
         #Recibe el mensaje y lo pasa a un arreglo de int donde cada posicion es un caracter en su valor UTF-8
@@ -222,7 +219,6 @@ class Modelo:
 
         print("La máscara generada por el automata es: " + str(mascara))
 
-
         #DESCIFRADO. Se descifra haciendo XOR elemento a elemento entre la mascara (último estado del AC) y el mensaje cifrado, ambos siendo arreglos de enteros decimales.
         #Se obtiene, asi, el mensaje original en forma de un arreglo de enteros. El contenido de este arreglo son los caracteres del mensaje original en sus valores UTF-8.
         arregloDescifrado = []
@@ -243,4 +239,8 @@ class Modelo:
         self.controlador.recibirMensaje(textoDescifrado)
         print("************ Fin proceso de recepción ************")
 
-        return True # TODO
+        return True  # TODO
+
+    def desconectar(self):
+        self.hilo_envio.desconectar()
+        self.hilo_recep.desconectar()

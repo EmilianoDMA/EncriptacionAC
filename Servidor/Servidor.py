@@ -9,7 +9,6 @@ from HiloCliente import HiloCliente
 # TODO: Hay que sacar esto del proyecto cliente a un nuevo proyecto servidor.
 
 class Servidor:
-
     puertos_cliente1 = {
         'recv': 8080,
         'send': 8081
@@ -31,7 +30,27 @@ class Servidor:
         self.cliente1 = HiloCliente(self, Servidor.puertos_cliente1, self.id_cliente_1, self.moduloDH, self.nroCompartidoDH)
         self.cliente2 = HiloCliente(self, Servidor.puertos_cliente2, self.id_cliente_2, self.moduloDH, self.nroCompartidoDH)
 
-        self.start()
+        self.start()  # Ejecuta los hilos que esperan conexiones
+        self.asignarPuertos()  # Envia a los clientes que quieren conectarse los puertos a los que deben hacerlo 
+
+    def asignarPuertos(self):
+        puertos = [8080, 9090]
+        i = 0
+        while i<2:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(('0.0.0.0', 9000))
+            sock.listen(1)
+            cliente, direccion = sock.accept()
+            print("Espero un nuevo cliente...")
+            mensaje = cliente.recv(1024)
+            print("Recibi "+str(mensaje.decode()))
+            if str(mensaje.decode()) == "conn":
+                cliente.send(str(puertos[i]).encode())
+                print("Enviado el puerto "+str(puertos[i])+" a un cliente")
+                i += 1
+            sock.close()
+            print("Socket cerrado")
 
     def start(self):
         self.cliente1.start()
