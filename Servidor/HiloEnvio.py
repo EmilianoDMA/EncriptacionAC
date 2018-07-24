@@ -24,6 +24,7 @@ class HiloEnvio(threading.Thread):
                 mensajes = self.padre.getMensajesPendientes()
                 print("Hay "+str(len(mensajes))+" mensajes pendientes para el cliente "+str(self.padre.id))
                 for mensaje in mensajes:
+                    self.socket.send(str(len(mensaje)).encode())
                     self.socket.send(mensaje)
                     mensajes.pop()
             else:

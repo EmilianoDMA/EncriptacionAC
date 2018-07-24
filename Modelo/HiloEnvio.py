@@ -19,6 +19,7 @@ class HiloEnvio(threading.Thread):
             if self.obj_cliente.hayMensajesPendientes():
                 mensajes = self.obj_cliente.getMensajesPendientes()
                 for mensaje in mensajes:
+                    self.socket.send(str(len(mensaje)).encode())
                     self.socket.send(mensaje)
                     mensajes.pop()
                 mensajeMostrado = False

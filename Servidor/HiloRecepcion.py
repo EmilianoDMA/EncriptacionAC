@@ -3,6 +3,7 @@
 import time
 import socket
 import threading
+import math
 
 
 class HiloRecepcion(threading.Thread):
@@ -16,7 +17,13 @@ class HiloRecepcion(threading.Thread):
     def run(self):
         self.padre.setMandarDH(self.diffieHellman())
         while True:
-            mensaje = self.cliente.recv(90000)
+            tam = int((self.cliente.recv(1024)).decode())
+            veces = 0
+            veces = math.ceil(tam/1024)
+            mensaje = b''
+            for j in range(0, veces):
+                msj = self.cliente.recv(1024)
+                mensaje += msj
             self.padre.mensajeNuevoRecibido(mensaje)
             print(mensaje)
 

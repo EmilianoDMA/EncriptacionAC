@@ -4,6 +4,7 @@ import time
 import socket
 import threading
 import random
+import math
 
 class HiloRecepcion(threading.Thread):
     def __init__(self, obj_cliente, socket, cliente):
@@ -21,7 +22,13 @@ class HiloRecepcion(threading.Thread):
         print("******* Conexión con el usuario establecida ********\n")
         self.obj_cliente.finDH()
         while True:
-            mensaje = self.cliente.recv(90000)
+            tam = int((self.cliente.recv(1024)).decode())
+            veces = 0
+            veces = math.ceil(tam/1024)
+            mensaje = b''
+            for j in range(0, veces):
+                msj = self.cliente.recv(1024)
+                mensaje += msj
             #self.obj_cliente.recibirMensaje(mensaje.decode())
             print(" ************ Nuevo Mensaje Recibido ************")
             print("Recibí : " + str(mensaje))
