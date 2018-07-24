@@ -9,6 +9,7 @@ class Vista(QtWidgets.QMainWindow):
         super().__init__()
         self.controlador = Controlador(self)
         self.controlador.recibir_mensaje.connect(self.escribirMensajeRecibido)
+        self.controlador.fin_dh.connect(self.habilitarVista)
         self.ventana = Ventana.Ui_MainWindow()
         self.ventana.setupUi(self)
         self.inicializaUI()
@@ -26,6 +27,7 @@ class Vista(QtWidgets.QMainWindow):
         self.ventana.enviar.setEnabled(False)
         self.ventana.menuOpciones.setEnabled(False)
 
+    @QtCore.pyqtSlot()
     def habilitarVista(self):
         self.ventana.escribir.setReadOnly(False)
         self.ventana.enviar.setEnabled(True)
@@ -72,7 +74,7 @@ class Vista(QtWidgets.QMainWindow):
 
     def conectar(self, ip):
         self.controlador.conectar(ip, self.obtenerPuerto(ip))
-        self.habilitarVista()
+        #self.habilitarVista()
 
     def cerrarConexiones(self):
         self.controlador.desconectar()

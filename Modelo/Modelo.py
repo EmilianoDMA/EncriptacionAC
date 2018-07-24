@@ -50,6 +50,9 @@ class Modelo:
         except ConnectionRefusedError:
             self.controlador.deshabilitarVista()
             self.controlador.informarError("No se pudo establecer la conexion")
+        
+    def finDH(self):
+        self.controlador.finDH()
 
     def hayMensajesPendientes(self):
         """

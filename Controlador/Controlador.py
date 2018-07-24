@@ -3,6 +3,7 @@ from Modelo import Modelo
 
 class Controlador(QtCore.QObject):
     recibir_mensaje = QtCore.pyqtSignal(str)
+    fin_dh = QtCore.pyqtSignal()
 
     def __init__(self, vista):
         QtCore.QObject.__init__(self)
@@ -11,6 +12,9 @@ class Controlador(QtCore.QObject):
 
     def conectar(self, ip, puerto):
         self.modelo.conectar(ip, puerto)
+
+    def finDH(self):
+        self.fin_dh.emit()
 
     def recibirMensaje(self, mensaje):
         self.recibir_mensaje.emit(mensaje)

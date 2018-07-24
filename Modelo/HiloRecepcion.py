@@ -19,6 +19,7 @@ class HiloRecepcion(threading.Thread):
         print("El secreto compartido es: " + str(self.obj_cliente.secretoCompartido))
         print("******* Fin Diffie-Hellman ********\n")
         print("******* Conexión con el usuario establecida ********\n")
+        self.obj_cliente.finDH()
         while True:
             mensaje = self.cliente.recv(90000)
             #self.obj_cliente.recibirMensaje(mensaje.decode())
