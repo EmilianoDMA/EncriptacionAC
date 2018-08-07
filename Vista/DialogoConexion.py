@@ -12,6 +12,7 @@ class DialogoConexion(QtWidgets.QDialog):
         self.show()
 
     def initDialogo(self):
+        self.setWindowTitle('Conexion...')
         self.ventana.deshabilitarVista()
         self.dialogo.ip.setText("localhost")
         self.dialogo.botones.accepted.connect(self.conectar)

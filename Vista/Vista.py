@@ -16,6 +16,7 @@ class Vista(QtWidgets.QMainWindow):
         self.show()
 
     def inicializaUI(self):
+        self.setWindowTitle('EncripChat v7.11.501-r272')
         self.ventana.mensajes.setReadOnly(True)
         self.ventana.enviar.clicked.connect(self.controlador.enviarMensaje)
         self.ventana.actionConectar.triggered.connect(self.conectar)
